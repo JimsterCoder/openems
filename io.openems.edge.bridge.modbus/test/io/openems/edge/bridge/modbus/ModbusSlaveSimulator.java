@@ -51,8 +51,8 @@ public class ModbusSlaveSimulator {
 
 	private static ProcessImage createProcessImage() {
 		var image = new SimpleProcessImage(UNIT_ID);
-		image.addRegister(1000, new SimpleRegister(500));
-		image.addRegister(1001, new SimpleRegister(100));
+		image.addRegister(1000, new SimpleRegister(255));
+		image.addRegister(1001, new SimpleRegister(101));
 		image.addRegister(2000, new SimpleRegister(123));
 		return image;
 	}

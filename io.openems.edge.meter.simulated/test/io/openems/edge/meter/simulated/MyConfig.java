@@ -33,12 +33,6 @@ public class MyConfig extends AbstractComponentConfig implements Config {
 		public MyConfig build() {
 			return new MyConfig(this);
 		}
-		
-//		public MyConfig type() {
-//			return null;
-//		}
-//		
-		
 	}
 
 	/**
