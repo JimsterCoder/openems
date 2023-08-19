@@ -180,7 +180,10 @@ public class MeterMicrocareSdm630Impl extends AbstractOpenemsModbusComponent
 
 	@Override
 	public String debugLog() {
-		return "L:" + this.getActivePower().asString();
+//		return "L this is new: " + this.getActivePowerL1Channel().toString();
+		return "L:" + this.getActivePowerL1().asString() + " V:" + this.getVoltageL1().asString();
+
+		//		return "L: " + this.getActivePower().asString() + " V: " + this.;
 	}
 
 	@Override
