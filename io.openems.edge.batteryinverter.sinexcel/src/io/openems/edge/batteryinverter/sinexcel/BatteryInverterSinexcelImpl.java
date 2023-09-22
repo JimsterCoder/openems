@@ -395,16 +395,16 @@ public class BatteryInverterSinexcelImpl extends AbstractOpenemsModbusComponent
 		return new ModbusProtocol(this, //
 				new FC3ReadRegistersTask(1, Priority.HIGH, //
 						m(BatteryInverterSinexcel.ChannelId.MANUFACTURER_AND_MODEL_NUMBER, //
-								new StringWordElement(11, 21)), //
-						m(BatteryInverterSinexcel.ChannelId.SERIAL_NUMBER, new StringWordElement(0, 11)), //
+								new StringWordElement(1, 16)), //
+						m(BatteryInverterSinexcel.ChannelId.SERIAL_NUMBER, new StringWordElement(17, 8)), //
 						new DummyRegisterElement(25, 31), //
 						m(new BitsWordElement(32, this) //
 								.bit(0, BatteryInverterSinexcel.ChannelId.FAULT_STATUS) //
 								.bit(1, BatteryInverterSinexcel.ChannelId.ALERT_STATUS) //
-								.bit(2, BatteryInverterSinexcel.ChannelId.DERATING_STATUS) //
 								.bit(2, BatteryInverterSinexcel.ChannelId.BATTERY_INVERTER_STATE) //
 								.bit(3, BatteryInverterSinexcel.ChannelId.INVERTER_GRID_MODE) //
 								.bit(4, BatteryInverterSinexcel.ChannelId.ISLAND_MODE) //
+								.bit(5, BatteryInverterSinexcel.ChannelId.DERATING_STATUS) //
 								.bit(6, BatteryInverterSinexcel.ChannelId.ALLOW_GRID_CONNECTION) //
 								.bit(7, BatteryInverterSinexcel.ChannelId.STANDBY_STATUS))), //
 				new FC3ReadRegistersTask(33, Priority.LOW, //
