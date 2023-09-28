@@ -393,111 +393,119 @@ public class BatteryInverterSinexcelImpl extends AbstractOpenemsModbusComponent
 	@Override
 	protected ModbusProtocol defineModbusProtocol() throws OpenemsException {
 		return new ModbusProtocol(this, //
-				new FC3ReadRegistersTask(1, Priority.HIGH, //
+				new FC3ReadRegistersTask(0, Priority.HIGH, //
+						m(BatteryInverterSinexcel.ChannelId.SERIAL_NUMBER, new StringWordElement(0, 11)), //
 						m(BatteryInverterSinexcel.ChannelId.MANUFACTURER_AND_MODEL_NUMBER, //
-								new StringWordElement(1, 16)), //
-						m(BatteryInverterSinexcel.ChannelId.SERIAL_NUMBER, new StringWordElement(17, 8)), //
-						new DummyRegisterElement(25, 31), //
+								new StringWordElement(11, 21)), //
 						m(new BitsWordElement(32, this) //
-								.bit(0, BatteryInverterSinexcel.ChannelId.FAULT_STATUS) //
-								.bit(1, BatteryInverterSinexcel.ChannelId.ALERT_STATUS) //
-								.bit(2, BatteryInverterSinexcel.ChannelId.BATTERY_INVERTER_STATE) //
-								.bit(3, BatteryInverterSinexcel.ChannelId.INVERTER_GRID_MODE) //
-								.bit(4, BatteryInverterSinexcel.ChannelId.ISLAND_MODE) //
-								.bit(5, BatteryInverterSinexcel.ChannelId.DERATING_STATUS) //
-								.bit(6, BatteryInverterSinexcel.ChannelId.ALLOW_GRID_CONNECTION) //
-								.bit(7, BatteryInverterSinexcel.ChannelId.STANDBY_STATUS))), //
+								.bit(0, BatteryInverterSinexcel.ChannelId.FAULT_STATUS) // /* fault status */
+								.bit(1, BatteryInverterSinexcel.ChannelId.ALERT_STATUS) // /* alarm status */
+								.bit(2, BatteryInverterSinexcel.ChannelId.DERATING_STATUS) // /* system derating status */
+
+								// next one is dummied as I don't know it's value and bit reading has to be contiguour
+								// i don't know if this is going to work
+								// .bit(3, BatteryInverterSinexcel.ChannelId.unknown) // /* **NEW** system booting status */
+								// .bit(3, BatteryInverterSinexcel.ChannelId.DummyRegisterElement) // /* dummy bit */ dummy bit
+
+								.bit(4, BatteryInverterSinexcel.ChannelId.INVERTER_GRID_MODE) // /* system grid-tied status 1=on-grid */
+								.bit(5, BatteryInverterSinexcel.ChannelId.ISLAND_MODE))), // /* system off-grid status 1=off-grid */
+
+								// next one needs to be set to true... how to do this?
+								// .bit(6, BatteryInverterSinexcel.ChannelId.ALLOW_GRID_CONNECTION) // **OLD** <------ NEED TO SET THIS TO TRUE (or find a value for it),***************************
+
+								// .bit(9, BatteryInverterSinexcel.ChannelId.unknown) // **NEW** /* system failed status 1=failed */
+
 				new FC3ReadRegistersTask(33, Priority.LOW, //
 						m(new BitsWordElement(33, this) //
-								.bit(0, BatteryInverterSinexcel.ChannelId.OBTAIN_FAULT_RECORD_FLAG) //
-								.bit(1, BatteryInverterSinexcel.ChannelId.WRITE_POWER_GENERATION_INTO_EEPROM) //
-								.bit(2, BatteryInverterSinexcel.ChannelId.INITIALIZE_DSP_PARAMETERS) //
-								.bit(3, BatteryInverterSinexcel.ChannelId.MASTER_SLAVE_MODE)), //
-						new DummyRegisterElement(34, 35), //
-						m(new BitsWordElement(36, this) //
-								.bit(0, BatteryInverterSinexcel.ChannelId.AC_OVER_VOLTAGE_PROTECTION) //
-								.bit(1, BatteryInverterSinexcel.ChannelId.AC_UNDER_VOLTAGE_PROTECTION) //
-								.bit(2, BatteryInverterSinexcel.ChannelId.AC_OVER_FREQUENCY_PROTECTION) //
-								.bit(3, BatteryInverterSinexcel.ChannelId.AC_UNDER_FREQUENCY_PROTECTION) //
-								.bit(4, BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_UNBALANCE) //
-								.bit(5, BatteryInverterSinexcel.ChannelId.GRID_PHASE_REVERSE) //
-								.bit(6, BatteryInverterSinexcel.ChannelId.INVERTER_ISLAND) //
-								.bit(7, BatteryInverterSinexcel.ChannelId.ON_GRID_OFF_GRID_SWITCH_OVER_FAILURE) //
-								.bit(8, BatteryInverterSinexcel.ChannelId.OUTPUT_GROUND_FAULT) //
-								.bit(9, BatteryInverterSinexcel.ChannelId.GRID_PHASE_LOCK_FAILED) //
-								.bit(10, BatteryInverterSinexcel.ChannelId.INTERNAL_AIR_OVER_TEMPERATURE) //
-								.bit(11, BatteryInverterSinexcel.ChannelId.GRID_CONNECTED_CONDITION_TIME_OUT) //
-								.bit(12, BatteryInverterSinexcel.ChannelId.MODULE_RENUMBER_FAILURE) //
-								.bit(13, BatteryInverterSinexcel.ChannelId.CANB_COMMUNICATION_FAILURE) //
-								.bit(14, BatteryInverterSinexcel.ChannelId.POWER_FREQUENCY_SYNCHRONIZATION_FAILURE) //
-								.bit(15, BatteryInverterSinexcel.ChannelId.CARRIER_SYNCHRONIZATION_FALURE)), //
-						m(new BitsWordElement(37, this) //
-								.bit(0, BatteryInverterSinexcel.ChannelId.EPO_ERROR) //
-								.bit(1, BatteryInverterSinexcel.ChannelId.MONITOR_PARAMETER_MISMATCH) //
-								.bit(2, BatteryInverterSinexcel.ChannelId.DSP_VERSION_ABNORMAL) //
-								.bit(3, BatteryInverterSinexcel.ChannelId.CPLD_VERSION_ERROR) //
-								.bit(4, BatteryInverterSinexcel.ChannelId.HARDWARE_VERSION_ERROR) //
-								.bit(5, BatteryInverterSinexcel.ChannelId.CANA_COMMUNICATION_FAILURE) //
-								.bit(6, BatteryInverterSinexcel.ChannelId.AUXILARY_POWER_FAULT) //
-								.bit(7, BatteryInverterSinexcel.ChannelId.FAN_FAILURE) //
-								.bit(8, BatteryInverterSinexcel.ChannelId.DC_OVER_VOLTAGE) //
-								.bit(9, BatteryInverterSinexcel.ChannelId.DC_LOW_VOLTAGE) //
-								.bit(10, BatteryInverterSinexcel.ChannelId.DC_VOLTAGE_UNBALANCED) //
-								.bit(12, BatteryInverterSinexcel.ChannelId.AC_RELAY_SHORT_CIRCUIT) //
-								.bit(13, BatteryInverterSinexcel.ChannelId.OUTPUT_VOLTAGE_ABNORMAL) //
-								.bit(14, BatteryInverterSinexcel.ChannelId.OUTPUT_CURRENT_UNBALANCED) //
-								.bit(15, BatteryInverterSinexcel.ChannelId.OVER_TEMPERATURE_OF_HEAT_SINK)), //
-						m(new BitsWordElement(38, this) //
-								.bit(0, BatteryInverterSinexcel.ChannelId.OUTPUT_OVER_LOAD_TOT) //
-								.bit(1, BatteryInverterSinexcel.ChannelId.GRID_CONTINUE_OVER_VOLTAGE) //
-								.bit(2, BatteryInverterSinexcel.ChannelId.AC_SOFT_START_FAILURE) //
-								.bit(3, BatteryInverterSinexcel.ChannelId.INVERTER_START_FAILURE) //
-								.bit(4, BatteryInverterSinexcel.ChannelId.AC_RELAY_IS_OPEN) //
-								.bit(5, BatteryInverterSinexcel.ChannelId.U2_BOARD_COMMUNICATION_IS_ABNORMAL) //
-								.bit(6, BatteryInverterSinexcel.ChannelId.AC_DC_COMPONENT_EXCESS) //
-								.bit(7, BatteryInverterSinexcel.ChannelId.MASTER_SLAVE_SAMPLING_ABNORMALITY) //
-								.bit(8, BatteryInverterSinexcel.ChannelId.PARAMETER_SETTING_ERROR) //
-								.bit(9, BatteryInverterSinexcel.ChannelId.LOW_OFF_GRID_ENERGY) //
-								.bit(10, BatteryInverterSinexcel.ChannelId.N_LINE_IS_NOT_CONNECTED) //
-								.bit(11, BatteryInverterSinexcel.ChannelId.STANDBY_BUS_HEIGHT) //
-								.bit(12, BatteryInverterSinexcel.ChannelId.SINGLE_PHASE_WIRING_ERROR) //
-								.bit(13, BatteryInverterSinexcel.ChannelId.EXCESSIVE_GRID_FREQUENCY_CHANGE) //
-								.bit(14, BatteryInverterSinexcel.ChannelId.ABRUPT_PHASE_ANGLE_FAULT_OF_POWER_GRID) //
-								.bit(15, BatteryInverterSinexcel.ChannelId.GRID_CONNECTION_PARAMETER_CONFLICT)), //
-						m(new BitsWordElement(39, this) //
-								.bit(0, BatteryInverterSinexcel.ChannelId.EE_READING_ERROR_1) //
-								.bit(1, BatteryInverterSinexcel.ChannelId.EE_READING_ERROR_2) //
-								.bit(2, BatteryInverterSinexcel.ChannelId.FLASH_READING_ERROR) //
-								.bit(3, BatteryInverterSinexcel.ChannelId.INVERTER_OVER_LOAD) //
-								.bit(4, BatteryInverterSinexcel.ChannelId.BATTERY_PARAMETER_SETTING_ERROR) //
-								.bit(5, BatteryInverterSinexcel.ChannelId.SLAVE_LOST_ALARM)), //
-						m(new BitsWordElement(40, this) //
-								.bit(0, BatteryInverterSinexcel.ChannelId.DC_CHARGING) //
-								.bit(1, BatteryInverterSinexcel.ChannelId.DC_DISCHARGING) //
-								.bit(2, BatteryInverterSinexcel.ChannelId.BATTERY_FULLY_CHARGED) //
-								.bit(3, BatteryInverterSinexcel.ChannelId.BATTERY_EMPTY) //
-								.bit(4, BatteryInverterSinexcel.ChannelId.DC_FAULT_STATUS) //
-								.bit(5, BatteryInverterSinexcel.ChannelId.DC_ALERT_STATUS)), //
-						new DummyRegisterElement(41, 43), //
-						m(new BitsWordElement(44, this) //
-								.bit(0, BatteryInverterSinexcel.ChannelId.DC_INPUT_OVER_VOLTAGE_PROTECTION) //
-								.bit(1, BatteryInverterSinexcel.ChannelId.DC_INPUT_UNDER_VOLTAGE_PROTECTION) //
-								.bit(3, BatteryInverterSinexcel.ChannelId.BMS_ALERT) //
-								.bit(4, BatteryInverterSinexcel.ChannelId.BMS_COMMUNICATION_TIMEOUT) //
-								.bit(5, BatteryInverterSinexcel.ChannelId.EMS_COMMUNICATION_TIMEOUT)), //
-						m(new BitsWordElement(45, this) //
-								.bit(0, BatteryInverterSinexcel.ChannelId.DC_SOFT_START_FAILED) //
-								.bit(1, BatteryInverterSinexcel.ChannelId.DC_RELAY_SHORT_CIRCUIT) //
-								.bit(2, BatteryInverterSinexcel.ChannelId.DC_RELAY_SHORT_OPEN) //
-								.bit(3, BatteryInverterSinexcel.ChannelId.BATTERY_POWER_OVER_LOAD) //
-								.bit(4, BatteryInverterSinexcel.ChannelId.DC_BUS_STARTING_FAILED) //
-								.bit(5, BatteryInverterSinexcel.ChannelId.DC_QUICK_CHECK_OVER_CURRENT)), //
-						new DummyRegisterElement(46), //
-						m(new BitsWordElement(47, this) //
-								.bit(0, BatteryInverterSinexcel.ChannelId.DC_OC)) //
+								.bit(0, BatteryInverterSinexcel.ChannelId.BATTERY_INVERTER_STATE) // /* system on/off status */
+								.bit(1, BatteryInverterSinexcel.ChannelId.STANDBY_STATUS) // /* system standby status */
+								.bit(2, BatteryInverterSinexcel.ChannelId.DC_CHARGING) // /* system charging status */
+								.bit(3, BatteryInverterSinexcel.ChannelId.DC_DISCHARGING) // /* system discharging status */
+								.bit(4, BatteryInverterSinexcel.ChannelId.BATTERY_FULLY_CHARGED) // /*system fully charged */
+								.bit(5, BatteryInverterSinexcel.ChannelId.BATTERY_EMPTY))), // /* system fully discharged */
+								// .bit(6, BatteryInverterSinexcel.ChannelId.unknown) // **NEW** /* system constant volt topping charging */
+								// .bit(0, BatteryInverterSinexcel.ChannelId.OBTAIN_FAULT_RECORD_FLAG) // **OLD**
 
-				),
+								// more old value for which I don't have a value
+								// .bit(1, BatteryInverterSinexcel.ChannelId.WRITE_POWER_GENERATION_INTO_EEPROM) // **OLD**
+								// .bit(2, BatteryInverterSinexcel.ChannelId.INITIALIZE_DSP_PARAMETERS) // **OLD**
+								// .bit(3, BatteryInverterSinexcel.ChannelId.MASTER_SLAVE_MODE)), // **OLD**
 
+				new FC3ReadRegistersTask(106, Priority.LOW, //
+						m(new BitsWordElement(106, this) //
+								.bit(0, BatteryInverterSinexcel.ChannelId.EPO_ERROR ) // /* was 37,0 */
+								// MORE gaps in bits which I don't know how to deal with
+
+								.bit(4, BatteryInverterSinexcel.ChannelId.INITIALIZE_DSP_PARAMETERS) // /* was 33,2 */
+
+								.bit(6, BatteryInverterSinexcel.ChannelId.DSP_VERSION_ABNORMAL ) // /* was 37,2 */
+								.bit(7, BatteryInverterSinexcel.ChannelId.CPLD_VERSION_ERROR ) // /* was 37,3 */
+								.bit(8, BatteryInverterSinexcel.ChannelId.HARDWARE_VERSION_ERROR ) // /* was 37,4 */
+
+								.bit(12, BatteryInverterSinexcel.ChannelId.MONITOR_PARAMETER_MISMATCH ))), // /* was 37,1 */
+
+				new FC3ReadRegistersTask(107, Priority.LOW, //
+						m(new BitsWordElement(107, this) //
+
+								.bit(1, BatteryInverterSinexcel.ChannelId.CANA_COMMUNICATION_FAILURE) // /* was 37,5 */
+								.bit(2, BatteryInverterSinexcel.ChannelId.CANB_COMMUNICATION_FAILURE) // /* was 36,13 */
+
+								.bit(8, BatteryInverterSinexcel.ChannelId.EMS_COMMUNICATION_TIMEOUT) // /* was 44,5 */
+								.bit(9, BatteryInverterSinexcel.ChannelId.BMS_COMMUNICATION_TIMEOUT))), // /* was 44,4 */
+
+				new FC3ReadRegistersTask(108, Priority.LOW, //
+						m(new BitsWordElement(108, this) //
+
+								.bit(1, BatteryInverterSinexcel.ChannelId.FAN_FAILURE) // /* was 37,7 */
+
+								.bit(11, BatteryInverterSinexcel.ChannelId.AUXILARY_POWER_FAULT))), // /* was 37,6 */
+								// should be orded with below ones to make AUXILARY_POWER_FAULT
+								// .bit(12, BatteryInverterSinexcel.) // /* was 37,5 */
+								// .bit(13, BatteryInverterSinexcel.) // /* was 37,5 */
+
+				new FC3ReadRegistersTask(109, Priority.LOW, //
+						m(new BitsWordElement(109, this) //
+		
+								.bit(9, BatteryInverterSinexcel.ChannelId.INTERNAL_AIR_OVER_TEMPERATURE))), // /* was 36,10 */
+
+				new FC3ReadRegistersTask(114, Priority.LOW, //
+						m(new BitsWordElement(114, this) //
+								.bit(0, BatteryInverterSinexcel.ChannelId.DC_INPUT_OVER_VOLTAGE_PROTECTION) // /* was 44,0 */
+								.bit(1, BatteryInverterSinexcel.ChannelId.DC_INPUT_UNDER_VOLTAGE_PROTECTION) // /* was 44,1 */
+
+								.bit(5, BatteryInverterSinexcel.ChannelId.DC_SOFT_START_FAILED) // /* was 45,0 */
+								.bit(6, BatteryInverterSinexcel.ChannelId.DC_RELAY_SHORT_OPEN) // /* was 45,2 */
+								.bit(7, BatteryInverterSinexcel.ChannelId.DC_RELAY_SHORT_CIRCUIT))), // /* was 45,1 */
+		
+				new FC3ReadRegistersTask(115, Priority.LOW, //
+						m(new BitsWordElement(115, this) //
+								.bit(0, BatteryInverterSinexcel.ChannelId.DC_OVER_VOLTAGE ) // /* was 37,8 */
+								.bit(1, BatteryInverterSinexcel.ChannelId.DC_LOW_VOLTAGE ) // /* was 37,9 */
+								.bit(2, BatteryInverterSinexcel.ChannelId.DC_VOLTAGE_UNBALANCED ) // /* was 37,10 */
+								.bit(3, BatteryInverterSinexcel.ChannelId.DC_BUS_STARTING_FAILED ) // /* was 45,4 */
+
+								.bit(9, BatteryInverterSinexcel.ChannelId.BMS_ALERT ))), // /* was 44,3 */
+
+				new FC3ReadRegistersTask(120, Priority.LOW, //
+						m(new BitsWordElement(120, this) //
+								.bit(0, BatteryInverterSinexcel.ChannelId.AC_OVER_VOLTAGE_PROTECTION ) // /* was 36,0 */
+								.bit(1, BatteryInverterSinexcel.ChannelId.AC_UNDER_VOLTAGE_PROTECTION ) // /* was 36,1 */
+								.bit(2, BatteryInverterSinexcel.ChannelId.AC_OVER_FREQUENCY_PROTECTION ) // /* was 36,2 */
+								.bit(3, BatteryInverterSinexcel.ChannelId.AC_UNDER_FREQUENCY_PROTECTION ) // /* was 36,3 */
+								.bit(4, BatteryInverterSinexcel.ChannelId.GRID_PHASE_REVERSE ) // /* was 36,5 */
+								.bit(5, BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_UNBALANCE ) // /* was 36,4 */
+
+								.bit(7, BatteryInverterSinexcel.ChannelId.GRID_PHASE_LOCK_FAILED ) // /* was 36,9 */
+								.bit(8, BatteryInverterSinexcel.ChannelId.INVERTER_ISLAND ))), // /* was 36,6 */
+		
+				new FC3ReadRegistersTask(121, Priority.LOW, //
+						m(new BitsWordElement(121, this) //
+								
+								.bit(6, BatteryInverterSinexcel.ChannelId.ON_GRID_OFF_GRID_SWITCH_OVER_FAILURE ) // /* was 36,7 */
+								.bit(7, BatteryInverterSinexcel.ChannelId.AC_SOFT_START_FAILURE ) // /* was 38,2 */
+								.bit(8, BatteryInverterSinexcel.ChannelId.AC_RELAY_IS_OPEN ) // /* was 38,4 */
+								.bit(9, BatteryInverterSinexcel.ChannelId.AC_RELAY_SHORT_CIRCUIT ))), // /* was 37,12 */
+		
 				new FC3ReadRegistersTask(101, Priority.HIGH, //
 						m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_L1, new SignedWordElement(101),
 								SCALE_FACTOR_2), //
