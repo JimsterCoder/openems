@@ -2,6 +2,7 @@ package io.openems.edge.batteryinverter.sinexcel;
 
 import io.openems.common.test.AbstractComponentConfig;
 import io.openems.common.utils.ConfigUtils;
+import io.openems.edge.batteryinverter.sinexcel.enums.BmsProtocolSelection;
 import io.openems.edge.batteryinverter.sinexcel.enums.CountryCode;
 import io.openems.edge.batteryinverter.sinexcel.enums.EnableDisable;
 import io.openems.edge.common.startstop.StartStopConfig;
@@ -15,6 +16,7 @@ public class MyConfig extends AbstractComponentConfig implements Config {
 		private StartStopConfig startStopConfig = null;
 		private CountryCode countryCode = null;
 		private EnableDisable emergencyPower = null;
+		private BmsProtocolSelection bmsProtocolSelection = null;
 
 		private Builder() {
 		}
@@ -42,6 +44,11 @@ public class MyConfig extends AbstractComponentConfig implements Config {
 		public Builder setEmergencyPower(EnableDisable emergencyPower) {
 			this.emergencyPower = emergencyPower;
 			return this;
+		}
+
+		public Builder setBmsProtocolSelection(BmsProtocolSelection bmsProtocolSelection) {
+					this.bmsProtocolSelection = bmsProtocolSelection;
+					return this;
 		}
 
 		public MyConfig build() {
@@ -88,6 +95,12 @@ public class MyConfig extends AbstractComponentConfig implements Config {
 	@Override
 	public String Modbus_target() {
 		return ConfigUtils.generateReferenceTargetFilter(this.id(), this.modbus_id());
+	}
+
+	@Override
+	public BmsProtocolSelection bmsProtocolSelection() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
