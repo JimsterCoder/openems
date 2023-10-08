@@ -4,10 +4,14 @@ import io.openems.common.types.OptionsEnum;
 
 public enum BmsProtocolSelection implements OptionsEnum {
 	UNDEFINED(-1, "Undefined"), //
-	ENERGY_PORT(0, "EP"), //
-	ALPHA(1, "Alpha-Ess"), //
-	PYLONTECH(2, "Pylontech"), //
-	BMSER(3, "Bmser"); //
+	DISABLED(0, "Disable"), //
+	POWERWISE(1, "PowerWise"), //
+	KGOOER(2, "KGOOER"), //
+	ALPHA(3, "Alpha-Ess"), //
+	ALPHA_CAN(21, "Alpha-Ess CAN"), //
+	PYLONTECH_CAN(22, "Pylontech CAN"), //
+	GOLDELEC_CAN(23, "Gold Elec. CAN"), //
+	SINEXCEL_CAN(24, "Sinexcel CAN"); //
 
 	private final int value;
 	private final String name;

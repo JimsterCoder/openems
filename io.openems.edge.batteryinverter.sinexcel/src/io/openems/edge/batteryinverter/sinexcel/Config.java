@@ -38,7 +38,7 @@ public @interface Config {
 	String Modbus_target() default "(enabled=true)";
 
 	@AttributeDefinition(name = "BMS Protocol", description = "This is how the Sinexcel gets its BMS data")
-	BmsProtocolSelection bmsProtocolSelection() default BmsProtocolSelection.UNDEFINED;
+	BmsProtocolSelection bmsProtocolSelection() default BmsProtocolSelection.DISABLED;
 	
 	String webconsole_configurationFactory_nameHint() default "Battery-Inverter Sinexcel [{id}]";
 }
