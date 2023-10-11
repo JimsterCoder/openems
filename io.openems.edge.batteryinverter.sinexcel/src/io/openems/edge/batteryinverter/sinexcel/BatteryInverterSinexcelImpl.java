@@ -506,255 +506,264 @@ public class BatteryInverterSinexcelImpl extends AbstractOpenemsModbusComponent
 								.bit(7, BatteryInverterSinexcel.ChannelId.AC_SOFT_START_FAILURE ) // /* was 38,2 */
 								.bit(8, BatteryInverterSinexcel.ChannelId.AC_RELAY_IS_OPEN ) // /* was 38,4 */
 								.bit(9, BatteryInverterSinexcel.ChannelId.AC_RELAY_SHORT_CIRCUIT ))), // /* was 37,12 */
-		
-				new FC3ReadRegistersTask(100, Priority.HIGH, //
-						m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_L1, new SignedWordElement(101),	SCALE_FACTOR_2), //
-						m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_L2, new SignedWordElement(102),	SCALE_FACTOR_2), //
-						m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_L3, new SignedWordElement(103),	SCALE_FACTOR_2), //
-						m(BatteryInverterSinexcel.ChannelId.GRID_CURRENT_L1, new SignedWordElement(104),	SCALE_FACTOR_2), //
-						m(BatteryInverterSinexcel.ChannelId.GRID_CURRENT_L2, new SignedWordElement(105),	SCALE_FACTOR_2), //
-						m(BatteryInverterSinexcel.ChannelId.GRID_CURRENT_L3, new SignedWordElement(106),	SCALE_FACTOR_2), //
-						m(BatteryInverterSinexcel.ChannelId.FREQUENCY, new SignedWordElement(107), SCALE_FACTOR_1), //
-						new DummyRegisterElement(108, 109),
-						m(BatteryInverterSinexcel.ChannelId.ACTIVE_POWER_L1, new SignedWordElement(110),	SCALE_FACTOR_1), //
-						m(BatteryInverterSinexcel.ChannelId.ACTIVE_POWER_L2, new SignedWordElement(111),	SCALE_FACTOR_1), //
-						m(BatteryInverterSinexcel.ChannelId.ACTIVE_POWER_L3, new SignedWordElement(112),	SCALE_FACTOR_1), //
-						m(BatteryInverterSinexcel.ChannelId.REACTIVE_POWER_L1, new SignedWordElement(113),	SCALE_FACTOR_1), //
-						m(BatteryInverterSinexcel.ChannelId.REACTIVE_POWER_L2, new SignedWordElement(114),	SCALE_FACTOR_1), //
-						m(BatteryInverterSinexcel.ChannelId.REACTIVE_POWER_L3, new SignedWordElement(115),	SCALE_FACTOR_1), //
-						m(BatteryInverterSinexcel.ChannelId.APPERENT_POWER_L1, new SignedWordElement(116),	SCALE_FACTOR_1), //
-						m(BatteryInverterSinexcel.ChannelId.APPERENT_POWER_L2, new SignedWordElement(117),	SCALE_FACTOR_1), //
-						m(BatteryInverterSinexcel.ChannelId.APPERENT_POWER_L3, new SignedWordElement(118),	SCALE_FACTOR_1), //
-						m(BatteryInverterSinexcel.ChannelId.COS_PHI_L1, new SignedWordElement(119),	SCALE_FACTOR_MINUS_2), //
-						m(BatteryInverterSinexcel.ChannelId.COS_PHI_L2, new SignedWordElement(120),	SCALE_FACTOR_MINUS_2), //
-						m(BatteryInverterSinexcel.ChannelId.COS_PHI_L3, new SignedWordElement(121),	SCALE_FACTOR_MINUS_2), //
-						m(SymmetricBatteryInverter.ChannelId.ACTIVE_POWER, new SignedWordElement(122),								chain(SCALE_FACTOR_1, IGNORE_LESS_THAN_100)), //
-						m(SymmetricBatteryInverter.ChannelId.REACTIVE_POWER, new SignedWordElement(123),	SCALE_FACTOR_1), //
-						m(BatteryInverterSinexcel.ChannelId.APPARENT_POWER, new SignedWordElement(124), SCALE_FACTOR_1), //
-						m(BatteryInverterSinexcel.ChannelId.COS_PHI, new SignedWordElement(125), SCALE_FACTOR_MINUS_2), //
-						new DummyRegisterElement(126, 131), //
-						m(BatteryInverterSinexcel.ChannelId.TEMPERATURE_OF_AC_HEAT_SINK, new SignedWordElement(132)), //
-						m(BatteryInverterSinexcel.ChannelId.DC_VOLTAGE_POSITIVE, new SignedWordElement(133),	SCALE_FACTOR_2), //
-						m(BatteryInverterSinexcel.ChannelId.DC_VOLTAGE_NEGATIVE, new SignedWordElement(134),	SCALE_FACTOR_2), //
-						m(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER, new SignedWordElement(135),	SCALE_FACTOR_2), //
-						m(BatteryInverterSinexcel.ChannelId.SET_REACTIVE_POWER, new SignedWordElement(136),	SCALE_FACTOR_2), //
-						m(BatteryInverterSinexcel.ChannelId.SET_OFF_GRID_VOLTAGE, new SignedWordElement(137),	SCALE_FACTOR_2), //
-						m(BatteryInverterSinexcel.ChannelId.SET_OFF_GRID_FREQUENCY, new SignedWordElement(138),	SCALE_FACTOR_1), //
-						new DummyRegisterElement(139, 140),
-						m(BatteryInverterSinexcel.ChannelId.DC_POWER, new SignedWordElement(141), SCALE_FACTOR_1), //
-						m(BatteryInverterSinexcel.ChannelId.DC_VOLTAGE, new SignedWordElement(142), SCALE_FACTOR_2), //
-						m(BatteryInverterSinexcel.ChannelId.DC_CURRENT, new SignedWordElement(143), SCALE_FACTOR_2), //
-						m(BatteryInverterSinexcel.ChannelId.DC_CHARGE_ENERGY, new UnsignedDoublewordElement(144),	SCALE_FACTOR_2), //
-						m(BatteryInverterSinexcel.ChannelId.DC_DISCHARGE_ENERGY, new UnsignedDoublewordElement(146),	SCALE_FACTOR_2), //
-						m(BatteryInverterSinexcel.ChannelId.TEMPERATURE_OF_DC_DC_HEAT_SINK, new SignedWordElement(148)) //
-				),
 
-				new FC3ReadRegistersTask(224, Priority.LOW, //
-						m(BatteryInverterSinexcel.ChannelId.DC_RELAY_REAR_END_VOLTAGE, new SignedWordElement(224),	SCALE_FACTOR_2), //
-						m(BatteryInverterSinexcel.ChannelId.CHARGE_MAX_CURRENT_READ, new UnsignedWordElement(225),	SCALE_FACTOR_2), //
-						m(BatteryInverterSinexcel.ChannelId.DISCHARGE_MAX_CURRENT_READ, new UnsignedWordElement(226),	SCALE_FACTOR_2), //
-						new DummyRegisterElement(227, 299),
-						m(BatteryInverterSinexcel.ChannelId.IP_ADDRESS_BLOCK_1, new UnsignedWordElement(300)), //
-						m(BatteryInverterSinexcel.ChannelId.IP_ADDRESS_BLOCK_2, new UnsignedWordElement(301)), //
-						m(BatteryInverterSinexcel.ChannelId.IP_ADDRESS_BLOCK_3, new UnsignedWordElement(302)), //
-						m(BatteryInverterSinexcel.ChannelId.IP_ADDRESS_BLOCK_4, new UnsignedWordElement(303)), //
-						m(BatteryInverterSinexcel.ChannelId.NETMASK_BLOCK_1, new UnsignedWordElement(304)), //
-						m(BatteryInverterSinexcel.ChannelId.NETMASK_BLOCK_2, new UnsignedWordElement(305)), //
-						m(BatteryInverterSinexcel.ChannelId.NETMASK_BLOCK_3, new UnsignedWordElement(306)), //
-						m(BatteryInverterSinexcel.ChannelId.NETMASK_BLOCK_4, new UnsignedWordElement(307)), //
-						m(BatteryInverterSinexcel.ChannelId.GATEWAY_IP_BLOCK_1, new UnsignedWordElement(308)), //
-						m(BatteryInverterSinexcel.ChannelId.GATEWAY_IP_BLOCK_2, new UnsignedWordElement(309)), //
-						m(BatteryInverterSinexcel.ChannelId.GATEWAY_IP_BLOCK_3, new UnsignedWordElement(310)), //
-						m(BatteryInverterSinexcel.ChannelId.GATEWAY_IP_BLOCK_4, new UnsignedWordElement(311)), //
-						m(BatteryInverterSinexcel.ChannelId.MAC, new StringWordElement(312, 3)), //
-						new DummyRegisterElement(315), //
-						m(BatteryInverterSinexcel.ChannelId.MODBUS_UNIT_ID, new UnsignedWordElement(316)), //
-						new DummyRegisterElement(317, 319),
-						m(BatteryInverterSinexcel.ChannelId.BAUDRATE, new UnsignedWordElement(320)), //
-						new DummyRegisterElement(321, 324),
-						m(BatteryInverterSinexcel.ChannelId.INTERFACE_TYPE, new UnsignedWordElement(325)), //
-						m(BatteryInverterSinexcel.ChannelId.COMMUNICATION_PROTOCOL_SELECTION,
-				new UnsignedWordElement(326)), //
-						m(BatteryInverterSinexcel.ChannelId.EMS_TIMEOUT, new UnsignedWordElement(327)), //
-						m(BatteryInverterSinexcel.ChannelId.EPO_ENABLE, new UnsignedWordElement(328)), //
-						m(BatteryInverterSinexcel.ChannelId.BMS_TIMEOUT, new UnsignedWordElement(329)), //
-						m(BatteryInverterSinexcel.ChannelId.BMS_PROTOCOL_SELECTION, new UnsignedWordElement(330)), //
-						m(BatteryInverterSinexcel.ChannelId.SET_GRID_MODE, new UnsignedWordElement(331)), //
-						m(BatteryInverterSinexcel.ChannelId.BUZZER_ENABLE, new UnsignedWordElement(332)), //
-						m(BatteryInverterSinexcel.ChannelId.RESTORE_FACTORY_SETTING, new UnsignedWordElement(333)) //
-				),
+        /*******************************************************************************************************************/
 
-				new FC3ReadRegistersTask(650, Priority.LOW, //
-						m(BatteryInverterSinexcel.ChannelId.START_INVERTER, new UnsignedWordElement(650)), //
-						m(BatteryInverterSinexcel.ChannelId.STOP_INVERTER, new UnsignedWordElement(651)), //
-						m(BatteryInverterSinexcel.ChannelId.CLEAR_FAILURE, new UnsignedWordElement(652)), //
-						m(BatteryInverterSinexcel.ChannelId.SET_ON_GRID_MODE, new UnsignedWordElement(653)), //
-						m(BatteryInverterSinexcel.ChannelId.SET_OFF_GRID_MODE, new UnsignedWordElement(654)), //
-						m(BatteryInverterSinexcel.ChannelId.SET_STANDBY_COMMAND, new UnsignedWordElement(655)), //
-						m(BatteryInverterSinexcel.ChannelId.SET_SOFT_START, new UnsignedWordElement(656)), //
-						m(BatteryInverterSinexcel.ChannelId.RESET_INSTRUCTION, new UnsignedWordElement(657)), //
-						m(BatteryInverterSinexcel.ChannelId.GRID_STOP, new UnsignedWordElement(658)) //
-				),
+        new FC3ReadRegistersTask(156, Priority.HIGH, //
+            m(BatteryInverterSinexcel.ChannelId.TEMPERATURE_OF_AC_HEAT_SINK, new SignedWordElement(156)), // /* was 132 */
+						new DummyRegisterElement(157, 163),
+						m(BatteryInverterSinexcel.ChannelId.COS_PHI, new SignedWordElement(164), SCALE_FACTOR_MINUS_2), // /* was 125 */
+            m(BatteryInverterSinexcel.ChannelId.COS_PHI_L1, new SignedWordElement(165),	SCALE_FACTOR_MINUS_2), // /* was 119 */
+            m(BatteryInverterSinexcel.ChannelId.COS_PHI_L2, new SignedWordElement(166),	SCALE_FACTOR_MINUS_2), // /* was 120 */
+            m(BatteryInverterSinexcel.ChannelId.COS_PHI_L3, new SignedWordElement(167),	SCALE_FACTOR_MINUS_2), // /* was 121 */
+            m(SymmetricBatteryInverter.ChannelId.ACTIVE_POWER, new SignedWordElement(168), chain(SCALE_FACTOR_1, IGNORE_LESS_THAN_100)), // /* was 122 */
+						m(BatteryInverterSinexcel.ChannelId.ACTIVE_POWER_L1, new SignedWordElement(169),	SCALE_FACTOR_1), // /* was 110 */
+						m(BatteryInverterSinexcel.ChannelId.ACTIVE_POWER_L2, new SignedWordElement(170),	SCALE_FACTOR_1), // /* was 111 */
+						m(BatteryInverterSinexcel.ChannelId.ACTIVE_POWER_L3, new SignedWordElement(171),	SCALE_FACTOR_1), // /* was 112 */
+						m(SymmetricBatteryInverter.ChannelId.REACTIVE_POWER, new SignedWordElement(172),	SCALE_FACTOR_1), // /* was 123 */
+            m(BatteryInverterSinexcel.ChannelId.REACTIVE_POWER_L1, new SignedWordElement(173),	SCALE_FACTOR_1), // /* was 113 */
+						m(BatteryInverterSinexcel.ChannelId.REACTIVE_POWER_L2, new SignedWordElement(174),	SCALE_FACTOR_1), // /* was 114 */
+						m(BatteryInverterSinexcel.ChannelId.REACTIVE_POWER_L3, new SignedWordElement(175),	SCALE_FACTOR_1), // /* was 115 */
+						m(BatteryInverterSinexcel.ChannelId.APPARENT_POWER, new SignedWordElement(176), SCALE_FACTOR_1), // /* was 124 */
+						m(BatteryInverterSinexcel.ChannelId.APPERENT_POWER_L1, new SignedWordElement(177),	SCALE_FACTOR_1), // /* was 116 */
+						m(BatteryInverterSinexcel.ChannelId.APPERENT_POWER_L2, new SignedWordElement(178),	SCALE_FACTOR_1), // /* was 117 */
+						m(BatteryInverterSinexcel.ChannelId.APPERENT_POWER_L3, new SignedWordElement(179),	SCALE_FACTOR_1), // /* was 118 */
+						m(BatteryInverterSinexcel.ChannelId.GRID_CURRENT_L1, new SignedWordElement(180),	SCALE_FACTOR_1), // /* was 104 */
+						m(BatteryInverterSinexcel.ChannelId.GRID_CURRENT_L2, new SignedWordElement(181),	SCALE_FACTOR_1), // /* was 105 */
+						m(BatteryInverterSinexcel.ChannelId.GRID_CURRENT_L3, new SignedWordElement(182),	SCALE_FACTOR_1), // /* was 106 */
+						m(BatteryInverterSinexcel.ChannelId.FREQUENCY, new SignedWordElement(183), SCALE_FACTOR_2), // /* was 107 */
+						new DummyRegisterElement(184, 186), //
+						m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_L1, new SignedWordElement(187),	SCALE_FACTOR_1), // /* was 101 */
+						m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_L2, new SignedWordElement(188),	SCALE_FACTOR_1), // /* was 102 */
+						m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_L3, new SignedWordElement(189),	SCALE_FACTOR_1) // /* was 103 */
+        ),
 
-				new FC3ReadRegistersTask(748, Priority.LOW, //
-						m(BatteryInverterSinexcel.ChannelId.VOLTAGE_LEVEL, new UnsignedWordElement(748)), //
-						m(BatteryInverterSinexcel.ChannelId.FREQUENCY_LEVEL, new UnsignedWordElement(749)), //
-						m(BatteryInverterSinexcel.ChannelId.INVERTER_WIRING_TOPOLOGY, new UnsignedWordElement(750)), //
-						new DummyRegisterElement(751),
-						m(BatteryInverterSinexcel.ChannelId.SWITCHING_DEVICE_ACCESS_SETTING,
-	new UnsignedWordElement(752)), //
-						m(BatteryInverterSinexcel.ChannelId.MODULE_POWER_LEVEL, new UnsignedWordElement(753)), //
-						m(BatteryInverterSinexcel.ChannelId.DC_VOLTAGE_LEVEL, new UnsignedWordElement(754)), //
-						m(BatteryInverterSinexcel.ChannelId.CPU_TYPE, new UnsignedWordElement(755)), //
-						m(BatteryInverterSinexcel.ChannelId.OFF_GRID_AND_PARALLEL_ENABLE, new UnsignedWordElement(756)), //
-						m(BatteryInverterSinexcel.ChannelId.SET_DC_SOFT_START_EXTERNAL_CONTROL,
-	new UnsignedWordElement(757)), //
-						new DummyRegisterElement(758, 767),
-						m(BatteryInverterSinexcel.ChannelId.GRID_OVER_VOLTAGE_PROTECTION_AMPLITUDE,
-	new SignedWordElement(768)), //
-						m(BatteryInverterSinexcel.ChannelId.AC_OVER_VOLTAGE_TRIP_TIME_1, new SignedWordElement(769)), //
-						m(BatteryInverterSinexcel.ChannelId.AC_OVER_VOLTAGE_TRIP_LEVEL_2, new SignedWordElement(770)), //
-						m(BatteryInverterSinexcel.ChannelId.AC_OVER_VOLTAGE_TRIP_TIME_2, new SignedWordElement(771)), //
-						m(BatteryInverterSinexcel.ChannelId.AC_UNDER_VOLTAGE_TRIP_LEVEL_1, new SignedWordElement(772)), //
-						m(BatteryInverterSinexcel.ChannelId.AC_UNDER_VOLTAGE_TRIP_TIME_1, new SignedWordElement(773)), //
-						m(BatteryInverterSinexcel.ChannelId.AC_UNDER_VOLTAGE_TRIP_LEVEL_2, new SignedWordElement(774)), //
-						m(BatteryInverterSinexcel.ChannelId.AC_UNDER_VOLTAGE_TRIP_TIME_2, new SignedWordElement(775)), //
-						m(BatteryInverterSinexcel.ChannelId.AC_UNDER_VOLTAGE_TRIP_LEVEL_3, new SignedWordElement(776)), //
-						m(BatteryInverterSinexcel.ChannelId.AC_UNDER_VOLTAGE_TRIP_TIME_3, new SignedWordElement(777)), //
+        /*******************************************************************************************************************/
 
-						m(BatteryInverterSinexcel.ChannelId.AC_OVER_FREQUENCY_TRIP_LEVEL_1, new SignedWordElement(778)), //
-						m(BatteryInverterSinexcel.ChannelId.AC_OVER_FREQUENCY_TRIP_TIME_1, new SignedWordElement(779)), //
-						m(BatteryInverterSinexcel.ChannelId.AC_OVER_FREQUENCY_TRIP_LEVEL_2, new SignedWordElement(780)), //
-						m(BatteryInverterSinexcel.ChannelId.AC_OVER_FREQUENCY_TRIP_TIME_2, new SignedWordElement(781)), //
+				// 		m(BatteryInverterSinexcel.ChannelId.DC_VOLTAGE_POSITIVE, new SignedWordElement(133),	SCALE_FACTOR_2), //
+				// 		m(BatteryInverterSinexcel.ChannelId.DC_VOLTAGE_NEGATIVE, new SignedWordElement(134),	SCALE_FACTOR_2), //
+				// 		m(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER, new SignedWordElement(135),	SCALE_FACTOR_2), //
+				// 		m(BatteryInverterSinexcel.ChannelId.SET_REACTIVE_POWER, new SignedWordElement(136),	SCALE_FACTOR_2), //
+				// 		m(BatteryInverterSinexcel.ChannelId.SET_OFF_GRID_VOLTAGE, new SignedWordElement(137),	SCALE_FACTOR_2), //
+				// 		m(BatteryInverterSinexcel.ChannelId.SET_OFF_GRID_FREQUENCY, new SignedWordElement(138),	SCALE_FACTOR_1), //
+				// 		new DummyRegisterElement(139, 140),
+				// 		m(BatteryInverterSinexcel.ChannelId.DC_POWER, new SignedWordElement(141), SCALE_FACTOR_1), //
+				// 		m(BatteryInverterSinexcel.ChannelId.DC_VOLTAGE, new SignedWordElement(142), SCALE_FACTOR_2), //
+				// 		m(BatteryInverterSinexcel.ChannelId.DC_CURRENT, new SignedWordElement(143), SCALE_FACTOR_2), //
+				// 		m(BatteryInverterSinexcel.ChannelId.DC_CHARGE_ENERGY, new UnsignedDoublewordElement(144),	SCALE_FACTOR_2), //
+				// 		m(BatteryInverterSinexcel.ChannelId.DC_DISCHARGE_ENERGY, new UnsignedDoublewordElement(146),	SCALE_FACTOR_2), //
+				// 		m(BatteryInverterSinexcel.ChannelId.TEMPERATURE_OF_DC_DC_HEAT_SINK, new SignedWordElement(148)) //
+				// ),
 
-						m(BatteryInverterSinexcel.ChannelId.AC_UNDER_FREQUENCY_TRIP_LEVEL_1,
-	new SignedWordElement(782)), //
-						m(BatteryInverterSinexcel.ChannelId.AC_UNDER_FREQUENCY_TRIP_TIME_1, new SignedWordElement(783)), //
-						m(BatteryInverterSinexcel.ChannelId.AC_UNDER_FREQUENCY_TRIP_LEVEL_2,
-	new SignedWordElement(784)), //
-						m(BatteryInverterSinexcel.ChannelId.AC_UNDER_FREQUENCY_TRIP_TIME_2, new SignedWordElement(785)), //
+	// 			new FC3ReadRegistersTask(224, Priority.LOW, //
+	// 					m(BatteryInverterSinexcel.ChannelId.DC_RELAY_REAR_END_VOLTAGE, new SignedWordElement(224),	SCALE_FACTOR_2), // 
+	// 					m(BatteryInverterSinexcel.ChannelId.CHARGE_MAX_CURRENT_READ, new UnsignedWordElement(225),	SCALE_FACTOR_2), //
+	// 					m(BatteryInverterSinexcel.ChannelId.DISCHARGE_MAX_CURRENT_READ, new UnsignedWordElement(226),	SCALE_FACTOR_2), //
+	// 					new DummyRegisterElement(227, 299),
+	// 					m(BatteryInverterSinexcel.ChannelId.IP_ADDRESS_BLOCK_1, new UnsignedWordElement(300)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.IP_ADDRESS_BLOCK_2, new UnsignedWordElement(301)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.IP_ADDRESS_BLOCK_3, new UnsignedWordElement(302)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.IP_ADDRESS_BLOCK_4, new UnsignedWordElement(303)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.NETMASK_BLOCK_1, new UnsignedWordElement(304)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.NETMASK_BLOCK_2, new UnsignedWordElement(305)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.NETMASK_BLOCK_3, new UnsignedWordElement(306)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.NETMASK_BLOCK_4, new UnsignedWordElement(307)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.GATEWAY_IP_BLOCK_1, new UnsignedWordElement(308)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.GATEWAY_IP_BLOCK_2, new UnsignedWordElement(309)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.GATEWAY_IP_BLOCK_3, new UnsignedWordElement(310)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.GATEWAY_IP_BLOCK_4, new UnsignedWordElement(311)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.MAC, new StringWordElement(312, 3)), //
+	// 					new DummyRegisterElement(315), //
+	// 					m(BatteryInverterSinexcel.ChannelId.MODBUS_UNIT_ID, new UnsignedWordElement(316)), //
+	// 					new DummyRegisterElement(317, 319),
+	// 					m(BatteryInverterSinexcel.ChannelId.BAUDRATE, new UnsignedWordElement(320)), //
+	// 					new DummyRegisterElement(321, 324),
+	// 					m(BatteryInverterSinexcel.ChannelId.INTERFACE_TYPE, new UnsignedWordElement(325)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.COMMUNICATION_PROTOCOL_SELECTION,
+	// 			new UnsignedWordElement(326)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.EMS_TIMEOUT, new UnsignedWordElement(327)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.EPO_ENABLE, new UnsignedWordElement(328)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.BMS_TIMEOUT, new UnsignedWordElement(329)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.BMS_PROTOCOL_SELECTION, new UnsignedWordElement(330)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.SET_GRID_MODE, new UnsignedWordElement(331)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.BUZZER_ENABLE, new UnsignedWordElement(332)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.RESTORE_FACTORY_SETTING, new UnsignedWordElement(333)) //
+	// 			),
 
-						m(BatteryInverterSinexcel.ChannelId.RECONNECT_TIME, new SignedWordElement(786)), //
-						new DummyRegisterElement(787, 789),
-						m(BatteryInverterSinexcel.ChannelId.ANTI_ISLANDING, new UnsignedWordElement(790)), //
+	// 			new FC3ReadRegistersTask(650, Priority.LOW, //
+	// 					m(BatteryInverterSinexcel.ChannelId.START_INVERTER, new UnsignedWordElement(650)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.STOP_INVERTER, new UnsignedWordElement(651)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.CLEAR_FAILURE, new UnsignedWordElement(652)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.SET_ON_GRID_MODE, new UnsignedWordElement(653)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.SET_OFF_GRID_MODE, new UnsignedWordElement(654)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.SET_STANDBY_COMMAND, new UnsignedWordElement(655)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.SET_SOFT_START, new UnsignedWordElement(656)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.RESET_INSTRUCTION, new UnsignedWordElement(657)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.GRID_STOP, new UnsignedWordElement(658)) //
+	// 			),
 
-						m(BatteryInverterSinexcel.ChannelId.FREQUENCY_VOLTAGE_RIDE_THROUGH,
-	new UnsignedWordElement(791)), //
-						m(BatteryInverterSinexcel.ChannelId.REACTIVE_POWER_CONTROL_MODE, new UnsignedWordElement(792)), //
-						m(BatteryInverterSinexcel.ChannelId.POWER_RISING_MODE, new UnsignedWordElement(793)), //
-						m(BatteryInverterSinexcel.ChannelId.ACTIVE_POWER_CONTROL_MODE, new UnsignedWordElement(794)), //
-						m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_ASYMMETRIC_DETECTON,
-	new UnsignedWordElement(795)), //
-						m(BatteryInverterSinexcel.ChannelId.CONTINUOUS_OVERVOLTAGE_DETECTION,
-	new UnsignedWordElement(796)), //
-						m(BatteryInverterSinexcel.ChannelId.GRID_EXISTENCE_DETECTION_ON, new UnsignedWordElement(797)), //
-						m(BatteryInverterSinexcel.ChannelId.NEUTRAL_FLOATING_DETECTION, new UnsignedWordElement(798)), //
-						m(BatteryInverterSinexcel.ChannelId.OFF_GRID_BLACKSTART_MODE, new UnsignedWordElement(799)), //
-						m(BatteryInverterSinexcel.ChannelId.GRID_CODE_SELECTION, new UnsignedWordElement(800)), //
-						m(BatteryInverterSinexcel.ChannelId.GRID_CONNECTED_ACTIVE_CAPACITY_LIMITATION_FUNCTION,
-	new UnsignedWordElement(801)), //
-						m(BatteryInverterSinexcel.ChannelId.GRID_ACTIVE_POWER_CAPACITY_SETTING,
-	new UnsignedWordElement(802)), //
-						m(BatteryInverterSinexcel.ChannelId.SINGLE_PHASE_MODE_SELECTION, new UnsignedWordElement(803)), //
-						m(BatteryInverterSinexcel.ChannelId.OVER_VOLTAGE_DROP_ACTIVE, new UnsignedWordElement(804)), //
-						m(BatteryInverterSinexcel.ChannelId.START_UP_MODE, new UnsignedWordElement(805)), //
-						new DummyRegisterElement(806),
-						m(BatteryInverterSinexcel.ChannelId.LOCAL_ID_SETTING, new SignedWordElement(807)), //
-						m(BatteryInverterSinexcel.ChannelId.FLOAT_CHARGE_VOLTAGE, new SignedWordElement(808),	SCALE_FACTOR_MINUS_1), //
-						m(BatteryInverterSinexcel.ChannelId.TOPPING_CHARGE_VOLTAGE, new SignedWordElement(809),	SCALE_FACTOR_MINUS_1), //
-						m(BatteryInverterSinexcel.ChannelId.CURRENT_FROM_TOPPING_CHARGING_TO_FLOAT_CHARGING,	new SignedWordElement(810), SCALE_FACTOR_MINUS_1), //
-						m(BatteryInverterSinexcel.ChannelId.CHARGE_MAX_CURRENT, new SignedWordElement(811),	SCALE_FACTOR_MINUS_1), //
-						m(BatteryInverterSinexcel.ChannelId.DISCHARGE_MAX_CURRENT, new SignedWordElement(812),	SCALE_FACTOR_MINUS_1), //
-						m(BatteryInverterSinexcel.ChannelId.DISCHARGE_MIN_VOLTAGE, new SignedWordElement(813),	SCALE_FACTOR_MINUS_1), //
-						m(BatteryInverterSinexcel.ChannelId.CHARGE_MAX_VOLTAGE, new SignedWordElement(814),	SCALE_FACTOR_MINUS_1), //
-						m(BatteryInverterSinexcel.ChannelId.BATTERY_VOLTAGE_PROTECTION_LIMIT,	new UnsignedWordElement(815), SCALE_FACTOR_MINUS_1) //
+	// 			new FC3ReadRegistersTask(748, Priority.LOW, //
+	// 					m(BatteryInverterSinexcel.ChannelId.VOLTAGE_LEVEL, new UnsignedWordElement(748)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.FREQUENCY_LEVEL, new UnsignedWordElement(749)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.INVERTER_WIRING_TOPOLOGY, new UnsignedWordElement(750)), //
+	// 					new DummyRegisterElement(751),
+	// 					m(BatteryInverterSinexcel.ChannelId.SWITCHING_DEVICE_ACCESS_SETTING,
+  //         	new UnsignedWordElement(752)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.MODULE_POWER_LEVEL, new UnsignedWordElement(753)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.DC_VOLTAGE_LEVEL, new UnsignedWordElement(754)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.CPU_TYPE, new UnsignedWordElement(755)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.OFF_GRID_AND_PARALLEL_ENABLE, new UnsignedWordElement(756)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.SET_DC_SOFT_START_EXTERNAL_CONTROL,
+	// new UnsignedWordElement(757)), //
+	// 					new DummyRegisterElement(758, 767),
+	// 					m(BatteryInverterSinexcel.ChannelId.GRID_OVER_VOLTAGE_PROTECTION_AMPLITUDE,
+	// new SignedWordElement(768)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.AC_OVER_VOLTAGE_TRIP_TIME_1, new SignedWordElement(769)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.AC_OVER_VOLTAGE_TRIP_LEVEL_2, new SignedWordElement(770)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.AC_OVER_VOLTAGE_TRIP_TIME_2, new SignedWordElement(771)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.AC_UNDER_VOLTAGE_TRIP_LEVEL_1, new SignedWordElement(772)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.AC_UNDER_VOLTAGE_TRIP_TIME_1, new SignedWordElement(773)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.AC_UNDER_VOLTAGE_TRIP_LEVEL_2, new SignedWordElement(774)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.AC_UNDER_VOLTAGE_TRIP_TIME_2, new SignedWordElement(775)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.AC_UNDER_VOLTAGE_TRIP_LEVEL_3, new SignedWordElement(776)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.AC_UNDER_VOLTAGE_TRIP_TIME_3, new SignedWordElement(777)), //
 
-				),
+	// 					m(BatteryInverterSinexcel.ChannelId.AC_OVER_FREQUENCY_TRIP_LEVEL_1, new SignedWordElement(778)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.AC_OVER_FREQUENCY_TRIP_TIME_1, new SignedWordElement(779)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.AC_OVER_FREQUENCY_TRIP_LEVEL_2, new SignedWordElement(780)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.AC_OVER_FREQUENCY_TRIP_TIME_2, new SignedWordElement(781)), //
 
-				new FC3ReadRegistersTask(825, Priority.LOW, //
-						m(BatteryInverterSinexcel.ChannelId.LEAKAGE_CURRENT_DC_COMPONENT_DETECTOR,
-	new UnsignedWordElement(825)), //
-						new DummyRegisterElement(826, 845),
-						m(BatteryInverterSinexcel.ChannelId.RESUME_AND_LIMIT_FREQUENCY, new SignedWordElement(846)), //
-						m(BatteryInverterSinexcel.ChannelId.RESTORE_LOWER_FREQUENCY_OF_GRID_CONNECTION,	new SignedWordElement(847)), //
-						m(BatteryInverterSinexcel.ChannelId.VOLTAGE_REACTIVE_REFERENCE, new UnsignedWordElement(848)), //
-						m(BatteryInverterSinexcel.ChannelId.VOLTAGE_AND_REACTIVE_POWER_ADJUSTMENT_POINT_V1,	new UnsignedWordElement(849)), //
-						m(BatteryInverterSinexcel.ChannelId.VOLTAGE_AND_REACTIVE_POWER_ADJUSTMENT_POINT_V2,	new SignedWordElement(850)), //
-						m(BatteryInverterSinexcel.ChannelId.VOLTAGE_AND_REACTIVE_POWER_ADJUSTMENT_POINT_V3,	new SignedWordElement(851)), //
-						m(BatteryInverterSinexcel.ChannelId.VOLTAGE_AND_REACTIVE_POWER_ADJUSTMENT_POINT_V4,	new SignedWordElement(852)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.AC_UNDER_FREQUENCY_TRIP_LEVEL_1,
+	// new SignedWordElement(782)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.AC_UNDER_FREQUENCY_TRIP_TIME_1, new SignedWordElement(783)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.AC_UNDER_FREQUENCY_TRIP_LEVEL_2,
+	// new SignedWordElement(784)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.AC_UNDER_FREQUENCY_TRIP_TIME_2, new SignedWordElement(785)), //
 
-						m(BatteryInverterSinexcel.ChannelId.MAX_CAPACITIVE_REACTIVE_REGULATION_Q1,	new SignedWordElement(853)), //
-						m(BatteryInverterSinexcel.ChannelId.INITIAL_CAPACITIVE_REACTIVE_REGULATION_Q2,	new SignedWordElement(854)), //
-						m(BatteryInverterSinexcel.ChannelId.INITIAL_INDUCTIVE_REACTIVE_REGULATION_Q3,	new SignedWordElement(855)), //
-						m(BatteryInverterSinexcel.ChannelId.MAX_INDUCTIVE_REACTIVE_REGULATION_Q4,	new SignedWordElement(856)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.RECONNECT_TIME, new SignedWordElement(786)), //
+	// 					new DummyRegisterElement(787, 789),
+	// 					m(BatteryInverterSinexcel.ChannelId.ANTI_ISLANDING, new UnsignedWordElement(790)), //
 
-						m(BatteryInverterSinexcel.ChannelId.VOLTAGE_AND_REACTIVE_RESPONSE_TIME,	new SignedWordElement(857)), //
-						m(BatteryInverterSinexcel.ChannelId.REACTIVE_FIRST_ORDER_RESPONSE_TIME,	new SignedWordElement(858)), //
-						new DummyRegisterElement(859, 861),
-						m(BatteryInverterSinexcel.ChannelId.INITIAL_VOLTAGE_V_START, new SignedWordElement(862)), //
-						m(BatteryInverterSinexcel.ChannelId.END_VOLTAGE_V_STOP, new SignedWordElement(863)), //
-						m(BatteryInverterSinexcel.ChannelId.INITIAL_POWER_P_START, new SignedWordElement(864)), //
-						m(BatteryInverterSinexcel.ChannelId.END_POWER_P_STOP, new SignedWordElement(865)), //
-						m(BatteryInverterSinexcel.ChannelId.RETURN_TO_SERVICE_DELAY, new SignedWordElement(866)), //
-						m(BatteryInverterSinexcel.ChannelId.VOLT_WATT_RESPONSE_TIME, new SignedWordElement(867)), //
-						m(BatteryInverterSinexcel.ChannelId.START_OF_FREQUENY_DROP, new SignedWordElement(868)), //
-						m(BatteryInverterSinexcel.ChannelId.SLOPE_OF_FREQUENCY_DROP, new SignedWordElement(869)), //
-						m(BatteryInverterSinexcel.ChannelId.FREQUENCY_WATT_F_STOP_DISCHARGE,
-	new SignedWordElement(870)), //
-						m(BatteryInverterSinexcel.ChannelId.FREQUENCY_WATT_F_STOP_CHARGE, new SignedWordElement(871)), //
-						m(BatteryInverterSinexcel.ChannelId.VOLT_WATT_V_START_CHARGE, new SignedWordElement(872)), //
-						new DummyRegisterElement(873, 875),
-						m(BatteryInverterSinexcel.ChannelId.SOFT_START_RAMP_RATE, new SignedWordElement(876)), //
-						m(BatteryInverterSinexcel.ChannelId.POWER_RAMP_RATE, new SignedWordElement(877)), //
-						m(BatteryInverterSinexcel.ChannelId.POWER_FACTOR_SETTING, new SignedWordElement(878),	SCALE_FACTOR_MINUS_2), //
-						m(BatteryInverterSinexcel.ChannelId.POWER_FACTOR_P1, new SignedWordElement(879),	SCALE_FACTOR_MINUS_2), //
-						m(BatteryInverterSinexcel.ChannelId.POWER_FACTOR_P2, new SignedWordElement(880),	SCALE_FACTOR_MINUS_2), //
-						m(BatteryInverterSinexcel.ChannelId.POWER_FACTOR_P3, new SignedWordElement(881),	SCALE_FACTOR_MINUS_2), //
-						m(BatteryInverterSinexcel.ChannelId.POWER_FACTOR_P4, new SignedWordElement(882),	SCALE_FACTOR_MINUS_2), //
-						m(BatteryInverterSinexcel.ChannelId.POWER_FACTOR_CURVE_MODE_P1, new SignedWordElement(883),	SCALE_FACTOR_MINUS_2), //
-						m(BatteryInverterSinexcel.ChannelId.POWER_FACTOR_CURVE_MODE_P2, new SignedWordElement(884),	SCALE_FACTOR_MINUS_2), //
-						m(BatteryInverterSinexcel.ChannelId.POWER_FACTOR_CURVE_MODE_P3, new SignedWordElement(885),	SCALE_FACTOR_MINUS_2), //
-						m(BatteryInverterSinexcel.ChannelId.POWER_FACTOR_CURVE_MODE_P4, new SignedWordElement(886),
-	SCALE_FACTOR_MINUS_2), //
-						m(BatteryInverterSinexcel.ChannelId.CONTINUOS_OVER_VOLTAGE_TRIP_THRESHOLD,	new SignedWordElement(887), SCALE_FACTOR_MINUS_2), //
-						m(BatteryInverterSinexcel.ChannelId.FREQUENCY_VARIATION_RATE_TRIP_THRESHOLD,	new SignedWordElement(888)), //
-						m(BatteryInverterSinexcel.ChannelId.PHASE_ANGLE_ABRUPT_TRIP_THRESHOLD,	new SignedWordElement(889)), //
-						m(BatteryInverterSinexcel.ChannelId.GRID_RECONNECTION_VOLTAGE_UPPER_LIMIT,	new SignedWordElement(890)), //
-						m(BatteryInverterSinexcel.ChannelId.GRID_RECONNECTION_VOLTAGE_LOWER_LIMIT,	new SignedWordElement(891)), //
-						m(BatteryInverterSinexcel.ChannelId.GRID_RECONNECTION_FREQUENCY_UPPER_LIMIT,	new SignedWordElement(892)), //
-						m(BatteryInverterSinexcel.ChannelId.GRID_RECONNECTION_FREQUENCY_LOWER_LIMIT,	new SignedWordElement(893)), //
-						m(BatteryInverterSinexcel.ChannelId.LOW_FREQUENCY_RAMP_RATE, new SignedWordElement(894)) //
-				),
+	// 					m(BatteryInverterSinexcel.ChannelId.FREQUENCY_VOLTAGE_RIDE_THROUGH,
+	// new UnsignedWordElement(791)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.REACTIVE_POWER_CONTROL_MODE, new UnsignedWordElement(792)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.POWER_RISING_MODE, new UnsignedWordElement(793)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.ACTIVE_POWER_CONTROL_MODE, new UnsignedWordElement(794)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_ASYMMETRIC_DETECTON,
+	// new UnsignedWordElement(795)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.CONTINUOUS_OVERVOLTAGE_DETECTION,
+	// new UnsignedWordElement(796)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.GRID_EXISTENCE_DETECTION_ON, new UnsignedWordElement(797)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.NEUTRAL_FLOATING_DETECTION, new UnsignedWordElement(798)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.OFF_GRID_BLACKSTART_MODE, new UnsignedWordElement(799)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.GRID_CODE_SELECTION, new UnsignedWordElement(800)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.GRID_CONNECTED_ACTIVE_CAPACITY_LIMITATION_FUNCTION,
+	// new UnsignedWordElement(801)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.GRID_ACTIVE_POWER_CAPACITY_SETTING,
+	// new UnsignedWordElement(802)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.SINGLE_PHASE_MODE_SELECTION, new UnsignedWordElement(803)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.OVER_VOLTAGE_DROP_ACTIVE, new UnsignedWordElement(804)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.START_UP_MODE, new UnsignedWordElement(805)), //
+	// 					new DummyRegisterElement(806),
+	// 					m(BatteryInverterSinexcel.ChannelId.LOCAL_ID_SETTING, new SignedWordElement(807)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.FLOAT_CHARGE_VOLTAGE, new SignedWordElement(808),	SCALE_FACTOR_MINUS_1), //
+	// 					m(BatteryInverterSinexcel.ChannelId.TOPPING_CHARGE_VOLTAGE, new SignedWordElement(809),	SCALE_FACTOR_MINUS_1), //
+	// 					m(BatteryInverterSinexcel.ChannelId.CURRENT_FROM_TOPPING_CHARGING_TO_FLOAT_CHARGING,	new SignedWordElement(810), SCALE_FACTOR_MINUS_1), //
+	// 					m(BatteryInverterSinexcel.ChannelId.CHARGE_MAX_CURRENT, new SignedWordElement(811),	SCALE_FACTOR_MINUS_1), //
+	// 					m(BatteryInverterSinexcel.ChannelId.DISCHARGE_MAX_CURRENT, new SignedWordElement(812),	SCALE_FACTOR_MINUS_1), //
+	// 					m(BatteryInverterSinexcel.ChannelId.DISCHARGE_MIN_VOLTAGE, new SignedWordElement(813),	SCALE_FACTOR_MINUS_1), //
+	// 					m(BatteryInverterSinexcel.ChannelId.CHARGE_MAX_VOLTAGE, new SignedWordElement(814),	SCALE_FACTOR_MINUS_1), //
+	// 					m(BatteryInverterSinexcel.ChannelId.BATTERY_VOLTAGE_PROTECTION_LIMIT,	new UnsignedWordElement(815), SCALE_FACTOR_MINUS_1) //
 
-				new FC3ReadRegistersTask(934, Priority.LOW, //
-						m(BatteryInverterSinexcel.ChannelId.METER_ACTIVE_POWER, new SignedWordElement(934),	SCALE_FACTOR_1), //
-						new DummyRegisterElement(935, 947),
-						m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_CALIBRATION_L1, new UnsignedWordElement(948),	SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_CALIBRATION_L2, new UnsignedWordElement(949),	SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_CALIBRATION_L3, new UnsignedWordElement(950),	SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.INVERTER_VOLTAGE_CALIBRATION_L1,	new UnsignedWordElement(951), SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.INVERTER_VOLTAGE_CALIBRATION_L2,	new UnsignedWordElement(952), SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.INVERTER_VOLTAGE_CALIBRATION_L3,	new UnsignedWordElement(953), SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.INDUCTOR_CURRENT_CALIBRATION_L1_PARAMETERS_1,	new UnsignedWordElement(954), SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.INDUCTOR_CURRENT_CALIBRATION_L2_PARAMETERS_1,	new UnsignedWordElement(955), SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.INDUCTOR_CURRENT_CALIBRATION_L3_PARAMETERS_1,	new UnsignedWordElement(956), SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.INDUCTOR_CURRENT_CALIBRATION_L1_PARAMETERS_2,	new UnsignedWordElement(957), SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.INDUCTOR_CURRENT_CALIBRATION_L2_PARAMETERS_2,	new UnsignedWordElement(958), SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.INDUCTOR_CURRENT_CALIBRATION_L3_PARAMETERS_2,	new UnsignedWordElement(959), SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.OUTPUT_CURRENT_CALIBRATION_L1, new UnsignedWordElement(960),	SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.OUTPUT_CURRENT_CALIBRATION_L2, new UnsignedWordElement(961),	SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.OUTPUT_CURRENT_CALIBRATION_L3, new UnsignedWordElement(962),	SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.POSITIVE_BUS_VOLTAGE_CALIBRATION,	new UnsignedWordElement(963), SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.NEGATIVE_BUS_VOLTAGE_CALIBRATION,	new UnsignedWordElement(964), SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.DC_VOLTAGE_CALIBRATION, new UnsignedWordElement(965),	SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.DC_CURRENT_CALIBRATION, new UnsignedWordElement(966),	SCALE_FACTOR_MINUS_3), //
-						m(BatteryInverterSinexcel.ChannelId.DC_INDUCTOR_CURRENT_CALIBRATION,	new UnsignedWordElement(967), SCALE_FACTOR_MINUS_3) //
-				),
+	// 			),
+
+	// 			new FC3ReadRegistersTask(825, Priority.LOW, //
+	// 					m(BatteryInverterSinexcel.ChannelId.LEAKAGE_CURRENT_DC_COMPONENT_DETECTOR,
+	// new UnsignedWordElement(825)), //
+	// 					new DummyRegisterElement(826, 845),
+	// 					m(BatteryInverterSinexcel.ChannelId.RESUME_AND_LIMIT_FREQUENCY, new SignedWordElement(846)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.RESTORE_LOWER_FREQUENCY_OF_GRID_CONNECTION,	new SignedWordElement(847)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.VOLTAGE_REACTIVE_REFERENCE, new UnsignedWordElement(848)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.VOLTAGE_AND_REACTIVE_POWER_ADJUSTMENT_POINT_V1,	new UnsignedWordElement(849)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.VOLTAGE_AND_REACTIVE_POWER_ADJUSTMENT_POINT_V2,	new SignedWordElement(850)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.VOLTAGE_AND_REACTIVE_POWER_ADJUSTMENT_POINT_V3,	new SignedWordElement(851)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.VOLTAGE_AND_REACTIVE_POWER_ADJUSTMENT_POINT_V4,	new SignedWordElement(852)), //
+
+	// 					m(BatteryInverterSinexcel.ChannelId.MAX_CAPACITIVE_REACTIVE_REGULATION_Q1,	new SignedWordElement(853)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.INITIAL_CAPACITIVE_REACTIVE_REGULATION_Q2,	new SignedWordElement(854)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.INITIAL_INDUCTIVE_REACTIVE_REGULATION_Q3,	new SignedWordElement(855)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.MAX_INDUCTIVE_REACTIVE_REGULATION_Q4,	new SignedWordElement(856)), //
+
+	// 					m(BatteryInverterSinexcel.ChannelId.VOLTAGE_AND_REACTIVE_RESPONSE_TIME,	new SignedWordElement(857)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.REACTIVE_FIRST_ORDER_RESPONSE_TIME,	new SignedWordElement(858)), //
+	// 					new DummyRegisterElement(859, 861),
+	// 					m(BatteryInverterSinexcel.ChannelId.INITIAL_VOLTAGE_V_START, new SignedWordElement(862)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.END_VOLTAGE_V_STOP, new SignedWordElement(863)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.INITIAL_POWER_P_START, new SignedWordElement(864)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.END_POWER_P_STOP, new SignedWordElement(865)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.RETURN_TO_SERVICE_DELAY, new SignedWordElement(866)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.VOLT_WATT_RESPONSE_TIME, new SignedWordElement(867)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.START_OF_FREQUENY_DROP, new SignedWordElement(868)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.SLOPE_OF_FREQUENCY_DROP, new SignedWordElement(869)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.FREQUENCY_WATT_F_STOP_DISCHARGE,
+	// new SignedWordElement(870)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.FREQUENCY_WATT_F_STOP_CHARGE, new SignedWordElement(871)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.VOLT_WATT_V_START_CHARGE, new SignedWordElement(872)), //
+	// 					new DummyRegisterElement(873, 875),
+	// 					m(BatteryInverterSinexcel.ChannelId.SOFT_START_RAMP_RATE, new SignedWordElement(876)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.POWER_RAMP_RATE, new SignedWordElement(877)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.POWER_FACTOR_SETTING, new SignedWordElement(878),	SCALE_FACTOR_MINUS_2), //
+	// 					m(BatteryInverterSinexcel.ChannelId.POWER_FACTOR_P1, new SignedWordElement(879),	SCALE_FACTOR_MINUS_2), //
+	// 					m(BatteryInverterSinexcel.ChannelId.POWER_FACTOR_P2, new SignedWordElement(880),	SCALE_FACTOR_MINUS_2), //
+	// 					m(BatteryInverterSinexcel.ChannelId.POWER_FACTOR_P3, new SignedWordElement(881),	SCALE_FACTOR_MINUS_2), //
+	// 					m(BatteryInverterSinexcel.ChannelId.POWER_FACTOR_P4, new SignedWordElement(882),	SCALE_FACTOR_MINUS_2), //
+	// 					m(BatteryInverterSinexcel.ChannelId.POWER_FACTOR_CURVE_MODE_P1, new SignedWordElement(883),	SCALE_FACTOR_MINUS_2), //
+	// 					m(BatteryInverterSinexcel.ChannelId.POWER_FACTOR_CURVE_MODE_P2, new SignedWordElement(884),	SCALE_FACTOR_MINUS_2), //
+	// 					m(BatteryInverterSinexcel.ChannelId.POWER_FACTOR_CURVE_MODE_P3, new SignedWordElement(885),	SCALE_FACTOR_MINUS_2), //
+	// 					m(BatteryInverterSinexcel.ChannelId.POWER_FACTOR_CURVE_MODE_P4, new SignedWordElement(886),
+	// SCALE_FACTOR_MINUS_2), //
+	// 					m(BatteryInverterSinexcel.ChannelId.CONTINUOS_OVER_VOLTAGE_TRIP_THRESHOLD,	new SignedWordElement(887), SCALE_FACTOR_MINUS_2), //
+	// 					m(BatteryInverterSinexcel.ChannelId.FREQUENCY_VARIATION_RATE_TRIP_THRESHOLD,	new SignedWordElement(888)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.PHASE_ANGLE_ABRUPT_TRIP_THRESHOLD,	new SignedWordElement(889)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.GRID_RECONNECTION_VOLTAGE_UPPER_LIMIT,	new SignedWordElement(890)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.GRID_RECONNECTION_VOLTAGE_LOWER_LIMIT,	new SignedWordElement(891)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.GRID_RECONNECTION_FREQUENCY_UPPER_LIMIT,	new SignedWordElement(892)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.GRID_RECONNECTION_FREQUENCY_LOWER_LIMIT,	new SignedWordElement(893)), //
+	// 					m(BatteryInverterSinexcel.ChannelId.LOW_FREQUENCY_RAMP_RATE, new SignedWordElement(894)) //
+	// 			),
+
+	// 			new FC3ReadRegistersTask(934, Priority.LOW, //
+	// 					m(BatteryInverterSinexcel.ChannelId.METER_ACTIVE_POWER, new SignedWordElement(934),	SCALE_FACTOR_1), //
+	// 					new DummyRegisterElement(935, 947),
+	// 					m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_CALIBRATION_L1, new UnsignedWordElement(948),	SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_CALIBRATION_L2, new UnsignedWordElement(949),	SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_CALIBRATION_L3, new UnsignedWordElement(950),	SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.INVERTER_VOLTAGE_CALIBRATION_L1,	new UnsignedWordElement(951), SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.INVERTER_VOLTAGE_CALIBRATION_L2,	new UnsignedWordElement(952), SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.INVERTER_VOLTAGE_CALIBRATION_L3,	new UnsignedWordElement(953), SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.INDUCTOR_CURRENT_CALIBRATION_L1_PARAMETERS_1,	new UnsignedWordElement(954), SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.INDUCTOR_CURRENT_CALIBRATION_L2_PARAMETERS_1,	new UnsignedWordElement(955), SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.INDUCTOR_CURRENT_CALIBRATION_L3_PARAMETERS_1,	new UnsignedWordElement(956), SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.INDUCTOR_CURRENT_CALIBRATION_L1_PARAMETERS_2,	new UnsignedWordElement(957), SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.INDUCTOR_CURRENT_CALIBRATION_L2_PARAMETERS_2,	new UnsignedWordElement(958), SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.INDUCTOR_CURRENT_CALIBRATION_L3_PARAMETERS_2,	new UnsignedWordElement(959), SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.OUTPUT_CURRENT_CALIBRATION_L1, new UnsignedWordElement(960),	SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.OUTPUT_CURRENT_CALIBRATION_L2, new UnsignedWordElement(961),	SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.OUTPUT_CURRENT_CALIBRATION_L3, new UnsignedWordElement(962),	SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.POSITIVE_BUS_VOLTAGE_CALIBRATION,	new UnsignedWordElement(963), SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.NEGATIVE_BUS_VOLTAGE_CALIBRATION,	new UnsignedWordElement(964), SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.DC_VOLTAGE_CALIBRATION, new UnsignedWordElement(965),	SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.DC_CURRENT_CALIBRATION, new UnsignedWordElement(966),	SCALE_FACTOR_MINUS_3), //
+	// 					m(BatteryInverterSinexcel.ChannelId.DC_INDUCTOR_CURRENT_CALIBRATION,	new UnsignedWordElement(967), SCALE_FACTOR_MINUS_3) //
+	// 			),
+
+        /*******************************************************************************************************************/
 
 				new FC6WriteRegisterTask(135, //
 						m(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER, new SignedWordElement(135),	SCALE_FACTOR_2)),
 				new FC6WriteRegisterTask(136, //
 						m(BatteryInverterSinexcel.ChannelId.SET_REACTIVE_POWER, new SignedWordElement(136),	SCALE_FACTOR_2)),
+
 //				new FC6WriteRegisterTask(137, //
 //						m(BatteryInverterSinexcel.ChannelId.SET_OFF_GRID_VOLTAGE, new SignedWordElement(137),	SCALE_FACTOR_MINUS_1)),
 //				new FC6WriteRegisterTask(138, //
