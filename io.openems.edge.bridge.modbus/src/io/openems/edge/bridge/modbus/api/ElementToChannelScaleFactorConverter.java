@@ -65,13 +65,6 @@ public class ElementToChannelScaleFactorConverter extends ElementToChannelConver
 			return null;
 		}
 
-		// some seriously screwed up code here to get a negative sign on the scale factor result
-//		if (scaleFactor == 666 && value instanceof Short) {
-//			var Xfactor = -1 * Math.pow(10, scaleFactor * -1);
-//			var result =  (Short) value * Xfactor;
-//			return Short.valueOf((short) result);
-//		}
-		
 		if (value instanceof Boolean) {
 			return (boolean) value;
 		}
