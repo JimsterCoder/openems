@@ -56,9 +56,22 @@ public class ElementToChannelScaleFactorConverter extends ElementToChannelConver
 
 	private static Object apply(Object value, int scaleFactor) {
 		var factor = Math.pow(10, scaleFactor * -1);
+		
+		if (scaleFactor == 666) {
+			factor = -1 * Math.pow(10, 2 * -1);;
+		}
+		
 		if (value == null) {
 			return null;
 		}
+
+		// some seriously screwed up code here to get a negative sign on the scale factor result
+//		if (scaleFactor == 666 && value instanceof Short) {
+//			var Xfactor = -1 * Math.pow(10, scaleFactor * -1);
+//			var result =  (Short) value * Xfactor;
+//			return Short.valueOf((short) result);
+//		}
+		
 		if (value instanceof Boolean) {
 			return (boolean) value;
 		}

@@ -55,6 +55,13 @@ public class ElementToChannelConverter {
 	public static final ElementToChannelConverter SCALE_FACTOR_2 = new ElementToChannelScaleFactorConverter(2);
 
 	/**
+	 * Applies a scale factor of NEGATIVE 2. Converts value [1] to [-100].
+	 *
+	 * @see ElementToChannelScaleFactorConverter
+	 */
+	public static final ElementToChannelConverter NEGATIVE_SCALE_FACTOR_2 = new ElementToChannelScaleFactorConverter(666);
+
+	/**
 	 * Applies a scale factor of 3. Converts value [1] to [1000].
 	 *
 	 * @see ElementToChannelScaleFactorConverter

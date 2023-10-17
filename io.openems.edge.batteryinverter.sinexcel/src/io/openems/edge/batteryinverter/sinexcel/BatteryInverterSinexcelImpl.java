@@ -2,6 +2,7 @@ package io.openems.edge.batteryinverter.sinexcel;
 
 import static io.openems.edge.bridge.modbus.api.ElementToChannelConverter.SCALE_FACTOR_1;
 import static io.openems.edge.bridge.modbus.api.ElementToChannelConverter.SCALE_FACTOR_2;
+import static io.openems.edge.bridge.modbus.api.ElementToChannelConverter.NEGATIVE_SCALE_FACTOR_2;
 //import static io.openems.edge.bridge.modbus.api.ElementToChannelConverter.SCALE_FACTOR_MINUS_1;
 import static io.openems.edge.bridge.modbus.api.ElementToChannelConverter.SCALE_FACTOR_MINUS_2;
 //import static io.openems.edge.bridge.modbus.api.ElementToChannelConverter.SCALE_FACTOR_MINUS_3;
@@ -529,18 +530,18 @@ public class BatteryInverterSinexcelImpl extends AbstractOpenemsModbusComponent
 						m(BatteryInverterSinexcel.ChannelId.APPERENT_POWER_L1, new SignedWordElement(177),	SCALE_FACTOR_1), // /* was 116 */
 						m(BatteryInverterSinexcel.ChannelId.APPERENT_POWER_L2, new SignedWordElement(178),	SCALE_FACTOR_1), // /* was 117 */
 						m(BatteryInverterSinexcel.ChannelId.APPERENT_POWER_L3, new SignedWordElement(179),	SCALE_FACTOR_1), // /* was 118 */
-						m(BatteryInverterSinexcel.ChannelId.GRID_CURRENT_L1, new SignedWordElement(180),	SCALE_FACTOR_1), // /* was 104 */
-						m(BatteryInverterSinexcel.ChannelId.GRID_CURRENT_L2, new SignedWordElement(181),	SCALE_FACTOR_1), // /* was 105 */
-						m(BatteryInverterSinexcel.ChannelId.GRID_CURRENT_L3, new SignedWordElement(182),	SCALE_FACTOR_1)), // /* was 106 */
+						m(BatteryInverterSinexcel.ChannelId.GRID_CURRENT_L1, new SignedWordElement(180),	SCALE_FACTOR_2), // /* was 104 */
+						m(BatteryInverterSinexcel.ChannelId.GRID_CURRENT_L2, new SignedWordElement(181),	SCALE_FACTOR_2), // /* was 105 */
+						m(BatteryInverterSinexcel.ChannelId.GRID_CURRENT_L3, new SignedWordElement(182),	SCALE_FACTOR_2)), // /* was 106 */
         new FC3ReadRegistersTask(183, Priority.HIGH, //
-						m(BatteryInverterSinexcel.ChannelId.FREQUENCY, new SignedWordElement(183), SCALE_FACTOR_2), // /* was 107 */
+						m(BatteryInverterSinexcel.ChannelId.FREQUENCY, new SignedWordElement(183), SCALE_FACTOR_1), // /* was 107 */
      				new DummyRegisterElement(184, 186)), //
     		new FC3ReadRegistersTask(187, Priority.HIGH, //
-						m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_L1, new SignedWordElement(187),	SCALE_FACTOR_1)), // /* was 101 */
+						m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_L1, new SignedWordElement(187),	SCALE_FACTOR_2)), // /* was 101 */
 		    new FC3ReadRegistersTask(188, Priority.HIGH, //
-						m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_L2, new SignedWordElement(188),	SCALE_FACTOR_1)), // /* was 102 */
+						m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_L2, new SignedWordElement(188),	SCALE_FACTOR_2)), // /* was 102 */
 		    new FC3ReadRegistersTask(189, Priority.HIGH, //
-						m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_L3, new SignedWordElement(189),	SCALE_FACTOR_1) // /* was 103 */
+						m(BatteryInverterSinexcel.ChannelId.GRID_VOLTAGE_L3, new SignedWordElement(189),	SCALE_FACTOR_2) // /* was 103 */
         ),
 
         /*******************************************************************************************************************/
@@ -761,8 +762,8 @@ public class BatteryInverterSinexcelImpl extends AbstractOpenemsModbusComponent
 				new FC6WriteRegisterTask(1022, m(BatteryInverterSinexcel.ChannelId.ACTIVE_POWER_CONTROL_MODE, new UnsignedWordElement(1022))), /* 794 */
 				new FC6WriteRegisterTask(1023, m(BatteryInverterSinexcel.ChannelId.REACTIVE_POWER_CONTROL_MODE, new UnsignedWordElement(1023))), /* 792 */
 
-				new FC6WriteRegisterTask(1024, m(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER, new SignedWordElement(1024),	SCALE_FACTOR_2)), /* 135 */
-				new FC6WriteRegisterTask(1025, m(BatteryInverterSinexcel.ChannelId.SET_REACTIVE_POWER, new SignedWordElement(1025),	SCALE_FACTOR_2)), /*136 */
+				new FC6WriteRegisterTask(1024, m(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER, new SignedWordElement(1024), NEGATIVE_SCALE_FACTOR_2)), /* 135 */
+				new FC6WriteRegisterTask(1025, m(BatteryInverterSinexcel.ChannelId.SET_REACTIVE_POWER, new SignedWordElement(1025),	NEGATIVE_SCALE_FACTOR_2)), /*136 */
 
         new FC6WriteRegisterTask(1215, m(BatteryInverterSinexcel.ChannelId.BMS_PROTOCOL_SELECTION, new UnsignedWordElement(1215))), /* 330 */
 				new FC6WriteRegisterTask(1216, m(BatteryInverterSinexcel.ChannelId.START_UP_MODE, new UnsignedWordElement(1216))) /* 805 */
