@@ -2,11 +2,12 @@ package io.openems.edge.batteryinverter.sinexcel;
 
 import static io.openems.edge.bridge.modbus.api.ElementToChannelConverter.SCALE_FACTOR_1;
 import static io.openems.edge.bridge.modbus.api.ElementToChannelConverter.SCALE_FACTOR_2;
-import static io.openems.edge.bridge.modbus.api.ElementToChannelConverter.NEGATIVE_SCALE_FACTOR_2;
+import static io.openems.edge.bridge.modbus.api.ElementToChannelConverter.SCALE_FACTOR_2_AND_INVERT;
+//import static io.openems.edge.bridge.modbus.api.ElementToChannelConverter.NEGATIVE_SCALE_FACTOR_2;
 //import static io.openems.edge.bridge.modbus.api.ElementToChannelConverter.SCALE_FACTOR_MINUS_1;
 import static io.openems.edge.bridge.modbus.api.ElementToChannelConverter.SCALE_FACTOR_MINUS_2;
 //import static io.openems.edge.bridge.modbus.api.ElementToChannelConverter.SCALE_FACTOR_MINUS_3;
-import static io.openems.edge.bridge.modbus.api.ElementToChannelConverter.chain;
+//import static io.openems.edge.bridge.modbus.api.ElementToChannelConverter.chain;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -45,7 +46,7 @@ import io.openems.edge.batteryinverter.sinexcel.statemachine.StateMachine;
 import io.openems.edge.batteryinverter.sinexcel.statemachine.StateMachine.State;
 import io.openems.edge.bridge.modbus.api.AbstractOpenemsModbusComponent;
 import io.openems.edge.bridge.modbus.api.BridgeModbus;
-import io.openems.edge.bridge.modbus.api.ElementToChannelConverter;
+//import io.openems.edge.bridge.modbus.api.ElementToChannelConverter;
 import io.openems.edge.bridge.modbus.api.ModbusComponent;
 import io.openems.edge.bridge.modbus.api.ModbusProtocol;
 import io.openems.edge.bridge.modbus.api.element.BitsWordElement;
@@ -518,10 +519,11 @@ public class BatteryInverterSinexcelImpl extends AbstractOpenemsModbusComponent
             m(BatteryInverterSinexcel.ChannelId.COS_PHI_L2, new SignedWordElement(166),	SCALE_FACTOR_MINUS_2), // /* was 120 */
             m(BatteryInverterSinexcel.ChannelId.COS_PHI_L3, new SignedWordElement(167),	SCALE_FACTOR_MINUS_2)), // /* was 121 */
         new FC3ReadRegistersTask(168, Priority.HIGH, //
-        				m(SymmetricBatteryInverter.ChannelId.ACTIVE_POWER, new SignedWordElement(168), chain(SCALE_FACTOR_1, IGNORE_LESS_THAN_100)), // /* was 122 */
-						m(BatteryInverterSinexcel.ChannelId.ACTIVE_POWER_L1, new SignedWordElement(169),	SCALE_FACTOR_1), // /* was 110 */
-						m(BatteryInverterSinexcel.ChannelId.ACTIVE_POWER_L2, new SignedWordElement(170),	SCALE_FACTOR_1), // /* was 111 */
-						m(BatteryInverterSinexcel.ChannelId.ACTIVE_POWER_L3, new SignedWordElement(171),	SCALE_FACTOR_1), // /* was 112 */
+        				m(SymmetricBatteryInverter.ChannelId.ACTIVE_POWER, new SignedWordElement(168), SCALE_FACTOR_2_AND_INVERT), // /* was 122 */
+						//m(SymmetricBatteryInverter.ChannelId.ACTIVE_POWER, new SignedWordElement(168), chain(SCALE_FACTOR_2, IGNORE_LESS_THAN_100)), // /* was 122 */
+						m(BatteryInverterSinexcel.ChannelId.ACTIVE_POWER_L1, new SignedWordElement(169),	SCALE_FACTOR_2_AND_INVERT), // /* was 110 */
+						m(BatteryInverterSinexcel.ChannelId.ACTIVE_POWER_L2, new SignedWordElement(170),	SCALE_FACTOR_2_AND_INVERT), // /* was 111 */
+						m(BatteryInverterSinexcel.ChannelId.ACTIVE_POWER_L3, new SignedWordElement(171),	SCALE_FACTOR_2_AND_INVERT), // /* was 112 */
 						m(SymmetricBatteryInverter.ChannelId.REACTIVE_POWER, new SignedWordElement(172),	SCALE_FACTOR_1), // /* was 123 */
 						m(BatteryInverterSinexcel.ChannelId.REACTIVE_POWER_L1, new SignedWordElement(173),	SCALE_FACTOR_1), // /* was 113 */
 						m(BatteryInverterSinexcel.ChannelId.REACTIVE_POWER_L2, new SignedWordElement(174),	SCALE_FACTOR_1), // /* was 114 */
@@ -762,8 +764,8 @@ public class BatteryInverterSinexcelImpl extends AbstractOpenemsModbusComponent
 				new FC6WriteRegisterTask(1022, m(BatteryInverterSinexcel.ChannelId.ACTIVE_POWER_CONTROL_MODE, new UnsignedWordElement(1022))), /* 794 */
 				new FC6WriteRegisterTask(1023, m(BatteryInverterSinexcel.ChannelId.REACTIVE_POWER_CONTROL_MODE, new UnsignedWordElement(1023))), /* 792 */
 
-				new FC6WriteRegisterTask(1024, m(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER, new SignedWordElement(1024), NEGATIVE_SCALE_FACTOR_2)), /* 135 */
-				new FC6WriteRegisterTask(1025, m(BatteryInverterSinexcel.ChannelId.SET_REACTIVE_POWER, new SignedWordElement(1025),	NEGATIVE_SCALE_FACTOR_2)), /*136 */
+				new FC6WriteRegisterTask(1024, m(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER, new SignedWordElement(1024), SCALE_FACTOR_2_AND_INVERT)), /* 135 */
+				new FC6WriteRegisterTask(1025, m(BatteryInverterSinexcel.ChannelId.SET_REACTIVE_POWER, new SignedWordElement(1025),	SCALE_FACTOR_2_AND_INVERT)), /*136 */
 
         new FC6WriteRegisterTask(1215, m(BatteryInverterSinexcel.ChannelId.BMS_PROTOCOL_SELECTION, new UnsignedWordElement(1215))), /* 330 */
 				new FC6WriteRegisterTask(1216, m(BatteryInverterSinexcel.ChannelId.START_UP_MODE, new UnsignedWordElement(1216))) /* 805 */
@@ -922,18 +924,18 @@ public class BatteryInverterSinexcelImpl extends AbstractOpenemsModbusComponent
 	 * if it does not. This little filter ignores values for ActivePower less than
 	 * 100 (charge/discharge).
 	 */
-	private static final ElementToChannelConverter IGNORE_LESS_THAN_100 = new ElementToChannelConverter(//
-			obj -> {
-				if (obj == null) {
-					return null;
-				}
-				int value = (Short) obj;
-				if (Math.abs(value) < 100) {
-					return 0;
-				}
-				return value;
-			}, //
-			value -> value);
+//	private static final ElementToChannelConverter IGNORE_LESS_THAN_100 = new ElementToChannelConverter(//
+//			obj -> {
+//				if (obj == null) {
+//					return null;
+//				}
+//				int value = (Short) obj;
+//				if (Math.abs(value) < 100) {
+//					return 0;
+//				}
+//				return value;
+//			}, //
+//			value -> value);
 
 	/**
 	 * Calculate the Energy values from ActivePower.
