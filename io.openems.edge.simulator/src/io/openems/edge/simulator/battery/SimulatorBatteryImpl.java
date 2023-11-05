@@ -19,6 +19,10 @@ import io.openems.edge.common.event.EdgeEventConstants;
 import io.openems.edge.common.startstop.StartStop;
 import io.openems.edge.common.startstop.StartStoppable;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.io.IOException;
+
 @Designate(ocd = Config.class, factory = true)
 @Component(//
 		name = "Simulator.Battery", //
@@ -84,11 +88,27 @@ public class SimulatorBatteryImpl extends AbstractOpenemsComponent
 		}
 	}
 
+	private int readSOCFromFile() {
+        String filePath = "/home/pi/openems/SOC.txt"; 
+
+        try {
+            // Read the entire file into a string
+            String content = new String(Files.readAllBytes(Paths.get(filePath)));
+            return Integer.parseInt(content);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            return -1;
+        }
+	}
+		
+	
 	private void updateChannels() {
 		this._setDischargeMinVoltage(this.disChargeMinVoltage);
 		this._setChargeMaxVoltage(this.chargeMaxVoltage);
 		this._setDischargeMaxCurrent(this.disChargeMaxCurrent);
 		this._setChargeMaxCurrent(this.chargeMaxCurrent);
+		this.soc = readSOCFromFile();
 		this._setSoc(this.soc);
 		this._setSoh(this.soh);
 		this._setMinCellTemperature(this.temperature);
