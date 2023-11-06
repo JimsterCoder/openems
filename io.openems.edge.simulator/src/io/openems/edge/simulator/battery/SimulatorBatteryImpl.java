@@ -23,6 +23,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.IOException;
 
+import java.time.LocalTime;
+
 @Designate(ocd = Config.class, factory = true)
 @Component(//
 		name = "Simulator.Battery", //
@@ -45,7 +47,8 @@ public class SimulatorBatteryImpl extends AbstractOpenemsComponent
 	private int capacityKWh;
 	private int voltage;
 	private int minCellVoltage; // in mV
-
+	private boolean readSOC;
+	
 	public SimulatorBatteryImpl() {
 		super(//
 				OpenemsComponent.ChannelId.values(), //
@@ -62,12 +65,13 @@ public class SimulatorBatteryImpl extends AbstractOpenemsComponent
 		this.chargeMaxVoltage = config.chargeMaxVoltage();
 		this.disChargeMaxCurrent = config.disChargeMaxCurrent();
 		this.chargeMaxCurrent = config.chargeMaxCurrent();
-		this.soc = config.soc();
+		this.soc = readSOCFromFile(true);
 		this.soh = config.soh();
 		this.temperature = config.temperature();
 		this.capacityKWh = config.capacityKWh();
 		this.voltage = config.voltage();
 		this.minCellVoltage = config.minCellVoltage_mV();
+		this.readSOC = false;
 	}
 
 	@Override
@@ -88,18 +92,37 @@ public class SimulatorBatteryImpl extends AbstractOpenemsComponent
 		}
 	}
 
+	
 	private int readSOCFromFile() {
-        String filePath = "/home/pi/openems/SOC.txt"; 
+		return readSOCFromFile(false);
+	}
+	
+	private int readSOCFromFile(boolean forceRead) {
+    // I suspect the code is called frequently (1 Hz?)
+    // I only want it to read the file once per minute (the update rate of the file)
+    // sure, it's not necessary to do this, but I want it this way
+    // the Pi runs on a memory card, which has a finite life
 
-        try {
-            // Read the entire file into a string
-            String content = new String(Files.readAllBytes(Paths.get(filePath)));
-            return Integer.parseInt(content);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            return -1;
-        }
+		LocalTime currentTime = LocalTime.now();
+		int seconds = currentTime.getSecond();
+		if (forceRead || (seconds > 30 && !this.readSOC)) {
+			this.readSOC = true;
+			// read the file
+	        String filePath = "/home/pi/openems/SOC.txt"; 
+	        try {
+	            // Read the entire file into a string
+	            String content = new String(Files.readAllBytes(Paths.get(filePath)));
+	            this.soc = Integer.parseInt(content);
+	        }
+	        catch (IOException e) {
+	            e.printStackTrace();
+	            return -1;
+	        }
+		}
+		else if (seconds > 0 && this.readSOC) {
+			this.readSOC = false;
+		}
+		return this.soc;
 	}
 		
 	
@@ -108,8 +131,7 @@ public class SimulatorBatteryImpl extends AbstractOpenemsComponent
 		this._setChargeMaxVoltage(this.chargeMaxVoltage);
 		this._setDischargeMaxCurrent(this.disChargeMaxCurrent);
 		this._setChargeMaxCurrent(this.chargeMaxCurrent);
-		this.soc = readSOCFromFile();
-		this._setSoc(this.soc);
+		this._setSoc(readSOCFromFile());
 		this._setSoh(this.soh);
 		this._setMinCellTemperature(this.temperature);
 		this._setMaxCellTemperature(this.temperature);
