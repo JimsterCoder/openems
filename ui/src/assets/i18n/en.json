@@ -34,6 +34,7 @@
         "twoWayInfoGrid": "Negative values correspond to grid feed-in, Positive values correspond to mains supply",
         "InfoStorageForCharge": "Negative values correspond to storage charging",
         "InfoStorageForDischarge": "Positive values correspond to storage discharge",
+        "TargetGridSetpoint": "The target setpoint for grid. Positive for buy-from-grid; negative for sell-to-grid.",
         "Channeltreshold": {
           "output": "Output"
         },
@@ -506,6 +507,7 @@
     "TOTAL": "Total",
     "totalState": "Total state",
     "warning": "Warning",
+    "targetGridSetpoint": "Target Grid Setpoint",
     "Week": {
       "monday": "Monday",
       "tuesday": "Tuesday",
