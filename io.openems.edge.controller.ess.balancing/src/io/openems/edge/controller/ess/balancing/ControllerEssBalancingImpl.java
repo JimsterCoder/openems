@@ -67,6 +67,9 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 
 	@Override
 	public void run() throws OpenemsNamedException {
+		if(config.mode() == Mode.MANUAL_OFF) {
+			return;
+		}
 		/*
 		 * Check that we are On-Grid (and warn on undefined Grid-Mode)
 		 */

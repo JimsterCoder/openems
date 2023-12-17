@@ -57,6 +57,11 @@ public class MyConfig extends AbstractComponentConfig implements Config {
 	}
 
 	@Override
+	public Mode mode() {
+		return Mode.MANUAL_ON;
+	}
+
+	@Override
 	public String ess_id() {
 		return this.builder.essId;
 	}

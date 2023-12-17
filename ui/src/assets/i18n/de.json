@@ -506,6 +506,7 @@
     "TOTAL": "Gesamt",
     "totalState": "Gesamtstatus",
     "warning": "Warnung",
+    "targetGridSetpoint": "Zielnetzsollwert",
     "Week": {
       "monday": "Montag",
       "tuesday": "Dienstag",
