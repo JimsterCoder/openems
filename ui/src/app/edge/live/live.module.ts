@@ -12,7 +12,7 @@ import { StorageComponent } from './common/storage/storage.component';
 import { Controller_ChannelthresholdComponent } from './Controller/Channelthreshold/Channelthreshold';
 import { Controller_ChpSocComponent } from './Controller/ChpSoc/ChpSoc';
 import { Controller_ChpSocModalComponent } from './Controller/ChpSoc/modal/modal.component';
-//import { Controller_Ess_FixActivePower } from './Controller/Ess/FixActivePower/Ess_FixActivePower';
+import { Controller_Ess_FixActivePower } from './Controller/Ess/FixActivePower/Ess_FixActivePower';
 import { Controller_Ess_Balancing } from './Controller/Ess/Balancing/Ess_Balancing';
 import { Controller_Ess_GridOptimizedCharge } from './Controller/Ess/GridOptimizedCharge/Ess_GridOptimizedCharge';
 import { Controller_Ess_TimeOfUseTariff_Discharge } from './Controller/Ess/TimeOfUseTariffDischarge/Ess_TimeOfUseTariff_Discharge';
@@ -55,7 +55,7 @@ import { Controller_Evcs } from './Controller/Evcs/Evcs';
     Common_Grid,
     Controller_Ess_TimeOfUseTariff_Discharge,
     // Controller
-    //Controller_Ess_FixActivePower,
+    Controller_Ess_FixActivePower,
     Controller_Ess_Balancing,
     Controller_Ess_GridOptimizedCharge,
     Controller_Io_HeatingElement,
