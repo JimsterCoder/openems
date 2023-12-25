@@ -28,7 +28,7 @@
         "ERROR_TOO_LONG": ""
       },
       "Widgets": {
-        "autarchyInfo": "Autarky indicates the percentage of current power that can be covered by generation and storage discharge.",
+        "autarchyInfo": "Self-sufficiency indicates the percentage of current power that can be covered by generation and storage discharge.",
         "phasesInfo": "For technical reasons, the sum of the individual phases can be slightly different from the total sum.",
         "selfconsumptionInfo": "Self-consumption indicates the percentage of the currently generated output that can be used by direct consumption and storage charging.",
         "twoWayInfoGrid": "Negative values correspond to grid feed-in, Positive values correspond to mains supply",
@@ -445,7 +445,7 @@
     "active": "Active",
     "actualPower": "e-car Charge power",
     "apply": "Apply",
-    "autarchy": "Autarchy",
+    "autarchy": "Self-sufficiency",
     "automatic": "Automatically",
     "cancel": "cancel",
     "capacity": "Capacity",
