@@ -87,6 +87,8 @@ public class UiWebsocketImpl extends AbstractOpenemsBackendComponent implements 
 					new JsonPrimitive(this.server != null ? this.server.getConnections().size() : 0));
 			this.timedataManager.write(EDGE_ID, new TimestampedDataNotification(data));
 		}, 10, 10, TimeUnit.SECONDS);
+		startServer();
+	
 	}
 
 	@Deactivate
@@ -103,6 +105,9 @@ public class UiWebsocketImpl extends AbstractOpenemsBackendComponent implements 
 	 * @param debugMode activate a regular debug log about the state of the tasks
 	 */
 	private synchronized void startServer(int port, int poolSize, DebugMode debugMode) {
+		if(this.server != null) {
+			return;
+		}
 		this.server = new WebsocketServer(this, "Ui.Websocket", port, poolSize, debugMode);
 		this.server.start();
 	}
@@ -113,6 +118,7 @@ public class UiWebsocketImpl extends AbstractOpenemsBackendComponent implements 
 	private synchronized void stopServer() {
 		if (this.server != null) {
 			this.server.stop();
+			this.server = null;
 		}
 	}
 
@@ -220,9 +226,13 @@ public class UiWebsocketImpl extends AbstractOpenemsBackendComponent implements 
 	public void handleEvent(Event event) {
 		switch (event.getTopic()) {
 		case Metadata.Events.AFTER_IS_INITIALIZED:
-			this.startServer(this.config.port(), this.config.poolSize(), this.config.debugMode());
+			startServer();
 			break;
 		}
+	}
+	
+	private void startServer() {
+		this.startServer(this.config.port(), this.config.poolSize(), this.config.debugMode());
 	}
 
 	@Override
