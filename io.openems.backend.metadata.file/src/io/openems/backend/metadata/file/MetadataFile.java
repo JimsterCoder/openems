@@ -92,6 +92,13 @@ public class MetadataFile extends AbstractMetadata implements Metadata, EventHan
 		super("Metadata.File");
 	}
 
+	private void cleanData() {
+		edges.clear();
+		userConfigMap.clear();
+		loginUsers.clear();
+		nextEdgeId.set(-1);
+	}
+
 	@Activate
 	private void activate(Config config) {
 		this.log.info("Activate [path=" + config.path() + "]");
@@ -218,8 +225,11 @@ public class MetadataFile extends AbstractMetadata implements Metadata, EventHan
 		try {
 			StringBuilder sb = readFile(this.path);
 			var config = JsonUtils.parse(sb.toString()).getAsJsonArray();
-			userConfigMap.clear();
-			loginUsers.clear();
+			if(config.isEmpty()) {
+				this.logInfo(this.log, "There is no user");
+				return;
+			}
+			cleanData();
 			for(JsonElement e : config.asList()) {
 				String username = JsonUtils.getAsString(e, "username");
 				String name = JsonUtils.getAsString(e, "name");
