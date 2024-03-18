@@ -218,6 +218,7 @@ public class MetadataFile extends AbstractMetadata implements Metadata, EventHan
 		while ((line = br.readLine()) != null) {
 			sb.append(line);
 		}
+		br.close();
 		return sb;
 	}
 
