@@ -65,7 +65,7 @@ public class User extends AbstractUser {
 		}
 		var thisRole = thisRoleOpt.get();
 		if (!thisRole.isAtLeast(role)) {
-			throw OpenemsError.COMMON_ROLE_ACCESS_DENIED.exception(resource, role.toString());
+			throw OpenemsError.COMMON_ROLE_ACCESS_DENIED.exception(resource, thisRole.toString());
 		}
 		return thisRole;
 	}
