@@ -236,7 +236,8 @@ public class MetadataFile extends AbstractMetadata implements Metadata, EventHan
 				String name = JsonUtils.getAsString(e, "name");
 				String password = JsonUtils.getAsString(e, "password");
 				String role = JsonUtils.getAsString(e, "role");
-				userConfigMap.put(username, new UserConfig(username, name, password, Role.getRole(role)));
+				String edgeApikey = JsonUtils.getAsString(e, "edgeApikey", "");
+				userConfigMap.put(username, new UserConfig(username, name, password, Role.getRole(role), edgeApikey));
 				this.logInfo(this.log, "User[username: " + username + ", role: " + role + "] has been added");
 			}
 
@@ -256,7 +257,7 @@ public class MetadataFile extends AbstractMetadata implements Metadata, EventHan
 
 	private User generateUser(UserConfig userConfig) {
 		return new User(userConfig.getUsername(), userConfig.getName(), UUID.randomUUID().toString(),
-				MetadataFile.LANGUAGE, userConfig.getRole(), this.edges.size() > 1);
+				MetadataFile.LANGUAGE, userConfig.getRole(), Strings.isEmpty(userConfig.getAdgeApikey()) && this.edges.size() > 1);
 	}
 
 	@Override
@@ -368,6 +369,10 @@ public class MetadataFile extends AbstractMetadata implements Metadata, EventHan
 							|| StringUtils.containsWithNullCheck(edge.getComment(), query) //
 							|| StringUtils.containsWithNullCheck(edge.getProducttype(), query) //
 			);
+		}
+		UserConfig userConfig = userConfigMap.get(user.getId());
+		if(userConfig != null && Strings.isNotEmpty(userConfig.getAdgeApikey()) && Role.GUEST == user.getGlobalRole()) {
+			pagesStream = pagesStream.filter(t -> Objects.equals(t.getApikey(), userConfig.getAdgeApikey()));
 		}
 		return pagesStream //
 				.sorted((s1, s2) -> s1.getId().compareTo(s2.getId())) //

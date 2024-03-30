@@ -694,6 +694,14 @@ public class JsonUtils {
 		throw OpenemsError.JSON_NO_STRING_MEMBER.exception(memberName, jElement.toString().replace("%", "%%"));
 	}
 
+	public static String getAsString(JsonElement jElement, String memberName, String defaultValue) throws OpenemsNamedException {
+		var value = toString(toPrimitive(toSubElement(jElement, memberName)));
+		if (value != null) {
+			return value;
+		}
+		return defaultValue;
+	}
+
 	/**
 	 * Gets the {@link JsonElement} as {@link Optional} {@link String}.
 	 *
