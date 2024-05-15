@@ -35,7 +35,7 @@ export class Language {
     public static readonly FR: Language = new Language("French", "fr", "fr", fr, localFR);
     public static readonly JA: Language = new Language("Japanese", "ja", "ja", ja, localJA);
 
-    public static readonly ALL = [Language.DE, Language.EN, Language.CZ, Language.NL, Language.ES, Language.FR];
+    public static readonly ALL = [Language.DE, Language.EN, Language.CZ, Language.NL, Language.ES, Language.FR, Language.JA];
     public static readonly DEFAULT = Language.EN;
 
     public static getByKey(key: string): Language | null {
