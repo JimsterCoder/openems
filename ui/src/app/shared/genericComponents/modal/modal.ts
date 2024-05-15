@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { Component, Input } from "@angular/core";
 import { FormGroup } from "@angular/forms";
 import { ModalController } from "@ionic/angular";
@@ -20,7 +21,7 @@ export enum Status {
             height: 100%;
             font-size: 0.9em;
         }
-    `]
+    `],
 })
 export class ModalComponent {
 
@@ -44,17 +45,17 @@ export class ModalComponent {
         public modalController: ModalController,
         private websocket: Websocket,
         private service: Service,
-        private translate: TranslateService
+        private translate: TranslateService,
     ) {
         this.service.getCurrentEdge().then(edge => this.edge = edge);
     }
 
     // Changes applied together
     public applyChanges() {
-        let updateComponentArray: { name: string, value: any }[] = [];
+        const updateComponentArray: { name: string, value: any }[] = [];
         this.service.startSpinner('spinner');
-        for (let key in this.formGroup.controls) {
-            let control = this.formGroup.controls[key];
+        for (const key in this.formGroup.controls) {
+            const control = this.formGroup.controls[key];
             this.formGroup.controls[key];
 
             // Check if formControl-value didn't change
@@ -64,7 +65,7 @@ export class ModalComponent {
 
             updateComponentArray.push({
                 name: key,
-                value: this.formGroup.value[key]
+                value: this.formGroup.value[key],
             });
         }
 

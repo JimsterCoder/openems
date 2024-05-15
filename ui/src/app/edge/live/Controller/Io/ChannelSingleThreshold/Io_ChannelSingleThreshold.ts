@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { Component } from '@angular/core';
 import { AbstractFlatWidget } from 'src/app/shared/genericComponents/flat/abstract-flat-widget';
 import { ChannelAddress, CurrentData, Utils } from 'src/app/shared/shared';
@@ -7,7 +8,7 @@ import { Controller_Io_ChannelSingleThresholdModalComponent } from './modal/moda
 
 @Component({
   selector: 'Controller_Io_ChannelSingleThresholdComponent',
-  templateUrl: './Io_ChannelSingleThreshold.html'
+  templateUrl: './Io_ChannelSingleThreshold.html',
 })
 export class Controller_Io_ChannelSingleThresholdComponent extends AbstractFlatWidget {
 
@@ -19,7 +20,7 @@ export class Controller_Io_ChannelSingleThresholdComponent extends AbstractFlatW
   public icon: Icon = {
     name: '',
     color: '',
-    size: ''
+    size: '',
   };
   public dependendOn: string;
   public dependendOnValue: any;
@@ -31,7 +32,7 @@ export class Controller_Io_ChannelSingleThresholdComponent extends AbstractFlatW
   public switchConverter = Utils.CONVERT_WATT_TO_KILOWATT;
 
   protected override getChannelAddresses() {
-    let outputChannelAddress: string | string[] = this.component.properties['outputChannelAddress'];
+    const outputChannelAddress: string | string[] = this.component.properties['outputChannelAddress'];
     if (typeof outputChannelAddress === 'string') {
       this.outputChannel = ChannelAddress.fromString(outputChannelAddress);
     } else {
@@ -174,8 +175,8 @@ export class Controller_Io_ChannelSingleThresholdComponent extends AbstractFlatW
         config: this.config,
         edge: this.edge,
         outputChannel: this.outputChannel,
-        inputChannel: this.inputChannel
-      }
+        inputChannel: this.inputChannel,
+      },
     });
     return await modal.present();
   }

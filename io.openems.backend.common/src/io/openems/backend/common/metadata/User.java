@@ -6,6 +6,9 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
+import com.google.gson.JsonObject;
+
+import io.openems.common.channel.Level;
 import io.openems.common.exceptions.OpenemsError;
 import io.openems.common.exceptions.OpenemsError.OpenemsNamedException;
 import io.openems.common.jsonrpc.response.GetEdgesResponse.EdgeMetadata;
@@ -28,13 +31,14 @@ public class User extends AbstractUser {
 	 */
 	private final boolean hasMultipleEdges;
 
-	public User(String id, String name, String token, Language language, Role globalRole, boolean hasMultipleEdges) {
-		this(id, name, token, language, globalRole, new TreeMap<>(), hasMultipleEdges);
+	public User(String id, String name, String token, Language language, Role globalRole, boolean hasMultipleEdges,
+			JsonObject settings) {
+		this(id, name, token, language, globalRole, new TreeMap<>(), hasMultipleEdges, settings);
 	}
 
 	public User(String id, String name, String token, Language language, Role globalRole,
-			NavigableMap<String, Role> roles, boolean hasMultipleEdges) {
-		super(id, name, language, globalRole, roles);
+			NavigableMap<String, Role> roles, boolean hasMultipleEdges, JsonObject settings) {
+		super(id, name, language, globalRole, roles, settings);
 		this.hasMultipleEdges = hasMultipleEdges;
 		this.token = token;
 	}
@@ -92,7 +96,9 @@ public class User extends AbstractUser {
 						edge.getVersion(), // Version
 						role, // Role
 						edge.isOnline(), // Online-State
-						edge.getLastmessage() // Last-Message Timestamp
+						edge.getLastmessage(), // Last-Message Timestamp
+						null, //
+						Level.OK //
 				));
 			}
 		}

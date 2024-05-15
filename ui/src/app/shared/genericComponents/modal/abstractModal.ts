@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { ChangeDetectorRef, Directive, Inject, Input, OnDestroy, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
@@ -23,6 +24,7 @@ export abstract class AbstractModal implements OnInit, OnDestroy {
     public stopOnDestroy: Subject<void> = new Subject<void>();
     public formGroup: FormGroup | null = null;
 
+    /** Should be used to unsubscribe from all subscribed observables at once */
     protected subscription: Subscription = new Subscription();
 
     /** Enum for User Role */
@@ -43,7 +45,7 @@ export abstract class AbstractModal implements OnInit, OnDestroy {
         @Inject(ModalController) public modalController: ModalController,
         @Inject(TranslateService) protected translate: TranslateService,
         @Inject(FormBuilder) public formBuilder: FormBuilder,
-        public ref: ChangeDetectorRef
+        public ref: ChangeDetectorRef,
     ) {
         ref.detach();
         setInterval(() => {
@@ -67,8 +69,8 @@ export abstract class AbstractModal implements OnInit, OnDestroy {
                 if (this.component != null) {
                     this.component = config.components[this.component.id];
 
-                    let channelIds = this.getChannelIds();
-                    for (let channelId of channelIds) {
+                    const channelIds = this.getChannelIds();
+                    for (const channelId of channelIds) {
                         channelAddresses.push(new ChannelAddress(this.component.id, channelId));
                     }
                 }
@@ -78,9 +80,9 @@ export abstract class AbstractModal implements OnInit, OnDestroy {
 
                 // call onCurrentData() with latest data
                 edge.currentData.pipe(takeUntil(this.stopOnDestroy)).subscribe(currentData => {
-                    let allComponents = {};
-                    for (let channelAddress of channelAddresses) {
-                        let ca = channelAddress.toString();
+                    const allComponents = {};
+                    for (const channelAddress of channelAddresses) {
+                        const ca = channelAddress.toString();
                         allComponents[ca] = currentData.channel[ca];
                     }
                     this.onCurrentData({ allComponents: allComponents });
@@ -94,7 +96,7 @@ export abstract class AbstractModal implements OnInit, OnDestroy {
             });
         });
     }
-    protected onIsInitialized() { };
+    protected onIsInitialized() { }
 
     public ngOnDestroy() {
         // Unsubscribe from OpenEMS
@@ -108,7 +110,7 @@ export abstract class AbstractModal implements OnInit, OnDestroy {
 
     /**
      * Called on every new data.
-     * 
+     *
      * @param currentData new data for the subscribed Channel-Addresses
      */
     protected onCurrentData(currentData: CurrentData) {

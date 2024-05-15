@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { Component } from '@angular/core';
 import { AbstractFlatWidget } from 'src/app/shared/genericComponents/flat/abstract-flat-widget';
 
@@ -6,7 +7,7 @@ import { Controller_Symmetric_PeakShavingModalComponent } from './modal/modal.co
 
 @Component({
     selector: 'Controller_Symmetric_PeakShaving',
-    templateUrl: './Symmetric.html'
+    templateUrl: './Symmetric.html',
 })
 export class Controller_Symmetric_PeakShavingComponent extends AbstractFlatWidget {
 
@@ -19,7 +20,7 @@ export class Controller_Symmetric_PeakShavingComponent extends AbstractFlatWidge
         return [
             new ChannelAddress(this.component.properties['meter.id'], 'ActivePower'),
             new ChannelAddress(this.componentId, '_PropertyPeakShavingPower'),
-            new ChannelAddress(this.componentId, '_PropertyRechargePower')
+            new ChannelAddress(this.componentId, '_PropertyRechargePower'),
         ];
     }
 
@@ -37,8 +38,8 @@ export class Controller_Symmetric_PeakShavingComponent extends AbstractFlatWidge
             component: Controller_Symmetric_PeakShavingModalComponent,
             componentProps: {
                 component: this.component,
-                edge: this.edge
-            }
+                edge: this.edge,
+            },
         });
         return await modal.present();
     }

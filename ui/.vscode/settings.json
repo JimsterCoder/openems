@@ -18,5 +18,18 @@
     "files.watcherExclude": {
         "**/.git/objects/**": true,
         "**/node_modules/**": true
+    },
+    "files.eol": "\n",
+    "files.insertFinalNewline": true,
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "eslint.format.enable": true,
+    "[typescript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
     }
 }

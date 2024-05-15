@@ -1,17 +1,20 @@
-#!/bin/bash
+#!/bin/bash -e
 #
 # Creates a Debian package for OpenEMS Edge + UI
 
-set -e
+OUTPUT=$( realpath ${1:-.} )
+
+DEBIAN_UI_LOCATION=tools/debian/usr/share/openems/www
+DEBIAN_EDGE_LOCATION=tools/debian/usr/lib/openems/
 
 main() {
     initialize_environment
     print_header
     check_dependencies
     common_update_version_in_code
-    common_build_edge_and_ui_in_parallel
     prepare_deb_template
     build_deb
+    create_version_file
     clean_deb_template
     echo "# FINISHED"
 }
@@ -24,32 +27,19 @@ initialize_environment() {
     # Include commons
     source $SCRIPT_DIR/common.sh
     common_initialize_environment
-
-    # Build detailed SNAPSHOT name
-    if [[ "$VERSION" == *"-SNAPSHOT" ]]; then
-        GIT_BRANCH="$(git branch --show-current)"
-        GIT_BRANCH="${GIT_BRANCH/\//"."}"
-        GIT_BRANCH="${GIT_BRANCH/-/"."}"
-        GIT_HASH=""
-        if [[ $(git diff --stat) != '' ]]; then
-            GIT_HASH="dirty"
-        else
-            GIT_HASH="$(git rev-parse --short HEAD)"
-        fi
-        DATE=$(date "+%Y%m%d.%H%M")
-        # Compliant with https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-version
-        VERSION_STRING="${GIT_BRANCH}.${DATE}.${GIT_HASH}"
-        VERSION="${VERSION/-SNAPSHOT/"-${VERSION_STRING}"}"
-    fi
+    common_build_snapshot_version
+    
     DEB_FILE="${PACKAGE_NAME}.deb"
+    VERSION_FILE="${PACKAGE_NAME}.version"
 }
 
 print_header() {
     echo "#"
     echo "# Building Debian Package"
     echo "#"
-    echo "# Theme: ${THEME}"
-    echo "# Version: ${VERSION}"
+    echo -e "# Theme:\t${THEME}"
+    echo -e "# Version:\t${VERSION}"
+    echo -e "# Destination:\t${OUTPUT}"
     echo "#"
 }
 
@@ -64,20 +54,35 @@ prepare_deb_template() {
     sed --in-place "s/^\(Version: \).*$/\1$VERSION/" tools/debian/DEBIAN/control
 
     echo "## Add OpenEMS Edge"
-    mkdir -p tools/debian/usr/lib/openems/
-    cp io.openems.edge.application/generated/distributions/executable/EdgeApp.jar tools/debian/usr/lib/openems/openems.jar
+    if [ -f "$DEBIAN_EDGE_LOCATION/openems.jar" ]; then
+        echo "openems.jar exists. Skipping common_build_edge."
+    else
+        mkdir -p "$DEBIAN_EDGE_LOCATION"
+        echo "openems.jar does not exist. Building common_build_edge."
+        common_build_edge
+        cp build/openems-edge.jar $DEBIAN_EDGE_LOCATION/openems.jar
+    fi
 
     echo "## Add OpenEMS UI"
-    rm -Rf tools/debian/usr/share/openems/www/*
-    mkdir -p tools/debian/usr/share/openems/www
-    cp -R ui/target/* tools/debian/usr/share/openems/www
+    if [ -d "$DEBIAN_UI_LOCATION" ] && [ "$(ls -A $DEBIAN_UI_LOCATION)" ] ; then
+        echo "openems.ui exists. Skipping common_build_ui."
+    else
+        mkdir -p "$DEBIAN_UI_LOCATION"
+        echo "openems.ui does not exist. Building common_build_ui."
+        common_build_ui
+        cp -R ui/target/* "$DEBIAN_UI_LOCATION"
+    fi
 }
 
 build_deb() {
     cd tools
-    dpkg-deb -Zxz --build "debian" "../${DEB_FILE}"
+    dpkg-deb -Zxz --build "debian" "${OUTPUT}/${DEB_FILE}"
     echo "## Built ${DEB_FILE}"
     cd ..
+}
+
+create_version_file() {
+    echo $VERSION > "${OUTPUT}/${VERSION_FILE}"
 }
 
 clean_deb_template() {

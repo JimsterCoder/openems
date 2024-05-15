@@ -13,6 +13,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -26,7 +27,6 @@ import com.influxdb.query.InfluxQLQueryResult;
 import com.influxdb.query.InfluxQLQueryResult.Result;
 import com.influxdb.query.InfluxQLQueryResult.Series;
 
-import io.openems.common.OpenemsOEM;
 import io.openems.common.exceptions.OpenemsError.OpenemsNamedException;
 import io.openems.common.exceptions.OpenemsException;
 import io.openems.common.timedata.DurationUnit;
@@ -45,6 +45,10 @@ import io.openems.shared.influxdb.InfluxConnector.InfluxConnection;
 public class InfluxQlProxy extends QueryProxy {
 
 	private static final Logger LOG = LoggerFactory.getLogger(InfluxQlProxy.class);
+
+	public InfluxQlProxy(String tag) {
+		super(tag);
+	}
 
 	@Override
 	public SortedMap<ChannelAddress, JsonElement> queryHistoricEnergy(//
@@ -83,13 +87,8 @@ public class InfluxQlProxy extends QueryProxy {
 							(t, u) -> u, TreeMap::new));
 		}
 
-		var channelsWithoutOldValues = firstResult.entrySet().stream() //
-				.filter(t -> t.getValue().first().isJsonNull() && !t.getValue().second().isJsonNull()) //
-				.map(Entry::getKey) //
-				.collect(Collectors.toSet());
-
 		final var beforeValues = this.queryFirstValueBefore(bucket, influxConnection, measurement, influxEdgeId,
-				fromDate, channelsWithoutOldValues);
+				fromDate, channels);
 
 		return mergeEnergyValues(firstResult, beforeValues);
 	}
@@ -108,24 +107,34 @@ public class InfluxQlProxy extends QueryProxy {
 		var query = this.buildHistoricDataQuery(bucket, measurement, influxEdgeId, fromDate, toDate, channels,
 				resolution);
 		var queryResult = this.executeQuery(influxConnection, bucket, query);
-		return convertHistoricDataQueryResult(queryResult, fromDate, resolution, channels, new Average());
+		return convertHistoricDataQueryResult(queryResult, fromDate, resolution, channels, Average::new);
 	}
 
-	// TODO maybe remove?
-	private static class Average implements BiFunction<JsonElement, JsonElement, JsonElement> {
+	protected static class Average implements BiFunction<JsonElement, JsonElement, JsonElement> {
 
-		private int count = 0;
+		private int count = 1;
+		// used to have a more accurate end-result
+		private JsonElement lastUnrounded = JsonNull.INSTANCE;
 
 		@Override
 		public JsonElement apply(JsonElement first, JsonElement second) {
-			if (!first.isJsonPrimitive() || !second.isJsonPrimitive() //
-					|| !first.getAsJsonPrimitive().isNumber() || !second.getAsJsonPrimitive().isNumber()) {
-				return second;
+			if (JsonUtils.isNumber(this.lastUnrounded)) {
+				first = this.lastUnrounded;
 			}
-			final var numberFirst = first.getAsNumber().longValue();
-			final var numberSecond = first.getAsNumber().longValue();
+			if (!JsonUtils.isNumber(first)) {
+				return this.lastUnrounded = second;
+			}
+			if (!JsonUtils.isNumber(second)) {
+				if (this.lastUnrounded.isJsonNull()) {
+					return this.lastUnrounded;
+				}
+				return new JsonPrimitive(Math.round(this.lastUnrounded.getAsDouble()));
+			}
+			final var numberFirst = first.getAsNumber().doubleValue();
+			final var numberSecond = second.getAsNumber().doubleValue();
 			final var result = (numberFirst * this.count + numberSecond) / ++this.count;
-			return new JsonPrimitive(result);
+			this.lastUnrounded = new JsonPrimitive(result);
+			return new JsonPrimitive(Math.round(result));
 		}
 
 	}
@@ -144,7 +153,8 @@ public class InfluxQlProxy extends QueryProxy {
 		var query = this.buildHistoricEnergyPerPeriodQuery(bucket, measurement, influxEdgeId, fromDate, toDate,
 				channels, resolution);
 		var queryResult = this.executeQuery(influxConnection, bucket, query);
-		var result = convertHistoricDataQueryResult(queryResult, fromDate, resolution, channels, InfluxQlProxy::last);
+		var result = convertHistoricDataQueryResult(queryResult, fromDate, resolution, channels,
+				() -> InfluxQlProxy::last);
 		return DbDataUtils.normalizeTable(result, channels, resolution, fromDate, toDate);
 	}
 
@@ -187,7 +197,11 @@ public class InfluxQlProxy extends QueryProxy {
 					fromDate, channelsForBeforeValues);
 
 			if (result.firstKey().isBefore(fromDate)) {
-				result.put(result.firstKey(), beforeValues);
+				// only update values which are newly queried
+				if (beforeValues != null && !beforeValues.isEmpty()) {
+					final var firstElement = result.get(result.firstKey());
+					firstElement.putAll(beforeValues);
+				}
 			} else {
 				result.put(fromDate.minusDays(1), beforeValues);
 			}
@@ -207,7 +221,7 @@ public class InfluxQlProxy extends QueryProxy {
 	) throws OpenemsNamedException {
 		final var query = this.buildFetchAvailableSinceQuery(bucket);
 		final var queryResult = this.executeQuery(influxConnection, bucket, query);
-		return convertAvailableSinceResult(queryResult);
+		return convertAvailableSinceResult(queryResult, this.tag);
 	}
 
 	@Override
@@ -245,8 +259,9 @@ public class InfluxQlProxy extends QueryProxy {
 				.append(measurement) //
 				.append(" WHERE ");
 		if (influxEdgeId.isPresent()) {
-			b.append(OpenemsOEM.INFLUXDB_TAG + " = '" + influxEdgeId.get() + "' AND ");
+			b.append(this.tag + " = '" + influxEdgeId.get() + "' AND ");
 		}
+
 		b //
 				.append("time >= ") //
 				.append(String.valueOf(fromDate.toEpochSecond())) //
@@ -256,6 +271,8 @@ public class InfluxQlProxy extends QueryProxy {
 				.append("s") //
 				.append(" GROUP BY time(") //
 				.append(resolution.toSeconds()) //
+				.append("s,") //
+				.append(Math.negateExact(fromDate.getOffset().getTotalSeconds())) //
 				.append("s)");
 		return b.toString();
 	}
@@ -279,7 +296,7 @@ public class InfluxQlProxy extends QueryProxy {
 				.append(measurement) //
 				.append(" WHERE ");
 		if (influxEdgeId.isPresent()) {
-			b.append(OpenemsOEM.INFLUXDB_TAG + " = '" + influxEdgeId.get() + "' AND ");
+			b.append(this.tag + " = '" + influxEdgeId.get() + "' AND ");
 		}
 		b //
 				.append("time > ") //
@@ -304,14 +321,13 @@ public class InfluxQlProxy extends QueryProxy {
 		// Prepare query string
 		var b = new StringBuilder("SELECT ") //
 				.append(channels.stream() //
-						.map(c -> "LAST(\"" + c.toString() + "\") AS \"LAST(" + c.toString() + ")\"" + ", FIRST(\"" //
-								+ c.toString() + "\") AS \"FIRST(" + c.toString() + ")\"") //
+						.map(c -> "LAST(\"" + c.toString() + "\") AS \"LAST(" + c.toString() + ")\"") //
 						.collect(Collectors.joining(", "))) //
 				.append(" FROM ") //
 				.append(measurement) //
 				.append(" WHERE ");
 		if (influxEdgeId.isPresent()) {
-			b.append(OpenemsOEM.INFLUXDB_TAG + " = '" + influxEdgeId.get() + "' AND ");
+			b.append(this.tag + " = '" + influxEdgeId.get() + "' AND ");
 		}
 		b //
 				.append("time >= ") //
@@ -342,7 +358,7 @@ public class InfluxQlProxy extends QueryProxy {
 				.append(measurement) //
 				.append(" WHERE ");
 		if (influxEdgeId.isPresent()) {
-			b.append(OpenemsOEM.INFLUXDB_TAG + " = '" + influxEdgeId.get() + "' AND ");
+			b.append(this.tag + " = '" + influxEdgeId.get() + "' AND ");
 		}
 
 		final long res;
@@ -383,7 +399,7 @@ public class InfluxQlProxy extends QueryProxy {
 				.append(measurement) //
 				.append(" WHERE ");
 		if (influxEdgeId.isPresent()) {
-			b.append(OpenemsOEM.INFLUXDB_TAG + " = '" + influxEdgeId.get() + "' AND ");
+			b.append(this.tag + " = '" + influxEdgeId.get() + "' AND ");
 		}
 
 		final long res;
@@ -410,7 +426,7 @@ public class InfluxQlProxy extends QueryProxy {
 			String bucket //
 	) {
 		return new StringBuilder("SELECT ") //
-				.append(OpenemsOEM.INFLUXDB_TAG) //
+				.append(this.tag) //
 				.append(", ") //
 				.append(QueryProxy.CHANNEL_TAG) //
 				.append(", ") //
@@ -439,7 +455,7 @@ public class InfluxQlProxy extends QueryProxy {
 
 		influxEdgeId.ifPresent(id -> {
 			builder.append(" AND ") //
-					.append(OpenemsOEM.INFLUXDB_TAG) //
+					.append(this.tag) //
 					.append(" = '") //
 					.append(id) //
 					.append("'");
@@ -484,13 +500,14 @@ public class InfluxQlProxy extends QueryProxy {
 			ZonedDateTime fromDate, //
 			Resolution resolution, //
 			Set<ChannelAddress> channels, //
-			BiFunction<JsonElement, JsonElement, JsonElement> aggregateFunction //
+			Supplier<BiFunction<JsonElement, JsonElement, JsonElement>> aggregateFunction //
 	) throws OpenemsNamedException {
 		if (queryResult == null) {
 			return null;
 		}
 
 		final SortedMap<ZonedDateTime, SortedMap<ChannelAddress, JsonElement>> table = new TreeMap<>();
+		final SortedMap<ZonedDateTime, SortedMap<ChannelAddress, BiFunction<JsonElement, JsonElement, JsonElement>>> aggregations = new TreeMap<>();
 		for (var result : queryResult.getResults()) {
 			var seriess = result.getSeries();
 			if (seriess != null) {
@@ -518,6 +535,7 @@ public class InfluxQlProxy extends QueryProxy {
 								}
 							}
 						}
+
 						SortedMap<ChannelAddress, JsonElement> tableRow;
 						if (existingData != null) {
 							tableRow = existingData;
@@ -535,7 +553,9 @@ public class InfluxQlProxy extends QueryProxy {
 							var value = convertToJsonElement(record.getValueByKey(column));
 							final var existingValue = tableRow.get(channel);
 							if (existingValue != null) {
-								value = aggregateFunction.apply(existingValue, value);
+								final var subMap = aggregations.computeIfAbsent(timestamp, t -> new TreeMap<>());
+								final var aggregate = subMap.computeIfAbsent(channel, t -> aggregateFunction.get());
+								value = aggregate.apply(existingValue, value);
 							}
 
 							tableRow.put(ChannelAddress.fromString(column), value);
@@ -568,9 +588,19 @@ public class InfluxQlProxy extends QueryProxy {
 					var timestampInstant = Instant
 							.ofEpochMilli(Long.parseLong((String) t.second().getValueByKey("time")));
 					var zonedDateTime = ZonedDateTime.ofInstant(timestampInstant, fromDate.getZone());
+					if (!zonedDateTime.isAfter(fromDate)) {
+						return zonedDateTime;
+					}
+
 					if (resolution.getUnit() == ChronoUnit.MONTHS) {
 						zonedDateTime = zonedDateTime.withDayOfMonth(1);
+					} else if (resolution.getUnit() == ChronoUnit.YEARS) {
+						zonedDateTime = zonedDateTime.withDayOfYear(1);
 					}
+					if (zonedDateTime.isBefore(fromDate)) {
+						zonedDateTime = fromDate;
+					}
+
 					return zonedDateTime.truncatedTo(DurationUnit.ofDays(1));
 				}, TreeMap::new, Collectors.toMap(Pair::first, r -> {
 					final var channel = r.first();
@@ -611,7 +641,7 @@ public class InfluxQlProxy extends QueryProxy {
 		return new JsonPrimitive(valueObj.toString());
 	}
 
-	private static SortedMap<ChannelAddress, Pair<JsonElement, JsonElement>> convertHistoricEnergyResultSingleValueInDay(//
+	private static SortedMap<ChannelAddress, JsonElement> convertHistoricEnergyResultSingleValueInDay(//
 			InfluxQLQueryResult queryResult, //
 			Optional<Integer> influxEdgeId, //
 			Set<ChannelAddress> channels //
@@ -629,12 +659,8 @@ public class InfluxQlProxy extends QueryProxy {
 				.collect(Collectors.toMap(Pair::first, t -> {
 					final var channel = t.first();
 					final var record = t.second();
-					var first = record.getValueByKey("FIRST(" + channel.toString() + ")");
 					final var last = record.getValueByKey("LAST(" + channel.toString() + ")");
-					if (Objects.equals(first, last)) {
-						first = null;
-					}
-					return new Pair<JsonElement, JsonElement>(convertToJsonElement(first), convertToJsonElement(last));
+					return convertToJsonElement(last);
 				}, (t, u) -> u, TreeMap::new));
 	}
 
@@ -766,8 +792,8 @@ public class InfluxQlProxy extends QueryProxy {
 		return map;
 	}
 
-	private static Map<Integer, Map<String, Long>> convertAvailableSinceResult(InfluxQLQueryResult queryResult)
-			throws OpenemsNamedException {
+	private static Map<Integer, Map<String, Long>> convertAvailableSinceResult(InfluxQLQueryResult queryResult,
+			String tag) throws OpenemsNamedException {
 		if (queryResult == null || queryResult.getResults() == null || queryResult.getResults().isEmpty()) {
 			return new TreeMap<>();
 		}
@@ -775,9 +801,7 @@ public class InfluxQlProxy extends QueryProxy {
 				.flatMap(result -> result.getSeries().stream()) //
 				.flatMap(series -> series.getValues().stream()) //
 				.collect(CollectorUtils.toDoubleMap(//
-						record -> Integer.parseInt(//
-								(String) record.getValueByKey(OpenemsOEM.INFLUXDB_TAG) //
-						), //
+						record -> Integer.parseInt((String) record.getValueByKey(tag)), //
 						record -> (String) record.getValueByKey(QueryProxy.CHANNEL_TAG), //
 						record -> Long.parseLong(//
 								(String) record.getValueByKey(QueryProxy.AVAILABLE_SINCE_COLUMN_NAME) //
@@ -786,22 +810,16 @@ public class InfluxQlProxy extends QueryProxy {
 	}
 
 	private static SortedMap<ChannelAddress, JsonElement> mergeEnergyValues(//
-			SortedMap<ChannelAddress, Pair<JsonElement, JsonElement>> firstResult, //
+			SortedMap<ChannelAddress, JsonElement> firstResult, //
 			SortedMap<ChannelAddress, JsonElement> beforeValues //
 	) {
 		return firstResult.entrySet().stream() //
 				.collect(Collectors.toMap(Entry::getKey, t -> {
 					final var channel = t.getKey();
-					final var pair = t.getValue();
-
-					if (pair.second().isJsonNull()) {
-						return JsonNull.INSTANCE;
-					}
-					var first = t.getValue().first();
-					var last = t.getValue().second();
-					if (first.isJsonNull() && beforeValues != null) {
-						first = beforeValues.get(channel);
-					}
+					var first = Optional.ofNullable(beforeValues) //
+							.map(m -> m.get(channel)) //
+							.orElse(JsonNull.INSTANCE);
+					var last = t.getValue();
 					if (first == null || first.isJsonNull()) {
 						return last;
 					}

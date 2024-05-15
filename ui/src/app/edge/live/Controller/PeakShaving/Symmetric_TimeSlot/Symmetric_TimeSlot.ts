@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { Component } from '@angular/core';
 import { AbstractFlatWidget } from 'src/app/shared/genericComponents/flat/abstract-flat-widget';
 
@@ -6,7 +7,7 @@ import { Controller_Symmetric_TimeSlot_PeakShavingModalComponent } from './modal
 
 @Component({
     selector: 'Controller_Symmetric_TimeSlot_PeakShaving',
-    templateUrl: './Symmetric_TimeSlot.html'
+    templateUrl: './Symmetric_TimeSlot.html',
 })
 export class Controller_Symmetric_TimeSlot_PeakShavingComponent extends AbstractFlatWidget {
 
@@ -19,7 +20,7 @@ export class Controller_Symmetric_TimeSlot_PeakShavingComponent extends Abstract
         return [
             new ChannelAddress(this.component.properties['meter.id'], 'ActivePower'),
             new ChannelAddress(this.componentId, '_PropertyPeakShavingPower'),
-            new ChannelAddress(this.componentId, '_PropertyRechargePower')
+            new ChannelAddress(this.componentId, '_PropertyRechargePower'),
         ];
     }
     protected override onCurrentData(currentData: CurrentData) {
@@ -35,8 +36,8 @@ export class Controller_Symmetric_TimeSlot_PeakShavingComponent extends Abstract
             component: Controller_Symmetric_TimeSlot_PeakShavingModalComponent,
             componentProps: {
                 component: this.component,
-                edge: this.edge
-            }
+                edge: this.edge,
+            },
         });
         modal.onDidDismiss().then(() => {
             this.service.getConfig().then(config => {

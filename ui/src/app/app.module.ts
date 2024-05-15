@@ -8,7 +8,6 @@ import { RouteReuseStrategy } from '@angular/router';
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { FORMLY_CONFIG } from '@ngx-formly/core';
 import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
-import { AngularMyDatePickerModule } from 'angular-mydatepicker';
 import { CookieService } from 'ngx-cookie-service';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -29,6 +28,7 @@ import { StatusSingleComponent } from './shared/status/single/status.component';
 import { registerTranslateExtension } from './shared/translate.extension';
 import { Language, MyTranslateLoader } from './shared/type/language';
 import { UserModule } from './user/user.module';
+import { AngularMyDatePickerModule } from '@nodro7/angular-mydatepicker';
 
 @NgModule({
   declarations: [
@@ -36,11 +36,7 @@ import { UserModule } from './user/user.module';
     ChartOptionsPopoverComponent,
     PickDatePopoverComponent,
     StatusSingleComponent,
-    SystemLogComponent
-  ],
-  entryComponents: [
-    ChartOptionsPopoverComponent,
-    PickDatePopoverComponent
+    SystemLogComponent,
   ],
   imports: [
     AngularMyDatePickerModule,
@@ -56,7 +52,7 @@ import { UserModule } from './user/user.module';
     SharedModule,
     TranslateModule.forRoot({ loader: { provide: TranslateLoader, useClass: MyTranslateLoader } }),
     UserModule,
-    RegistrationModule
+    RegistrationModule,
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
@@ -66,9 +62,9 @@ import { UserModule } from './user/user.module';
     // Use factory for formly. This allows us to use translations in validationMessages.
     { provide: FORMLY_CONFIG, multi: true, useFactory: registerTranslateExtension, deps: [TranslateService] },
     Pagination,
-    CheckForUpdateService
+    CheckForUpdateService,
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
 export class AppModule {
   constructor() {

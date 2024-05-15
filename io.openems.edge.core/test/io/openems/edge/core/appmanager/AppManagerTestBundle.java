@@ -8,14 +8,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.ComponentServiceObjects;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
@@ -27,7 +28,6 @@ import com.google.gson.JsonPrimitive;
 
 import io.openems.common.exceptions.OpenemsError.OpenemsNamedException;
 import io.openems.common.exceptions.OpenemsException;
-import io.openems.common.jsonrpc.base.JsonrpcResponseSuccess;
 import io.openems.common.types.EdgeConfig;
 import io.openems.common.utils.JsonUtils;
 import io.openems.common.utils.ReflectionUtils;
@@ -38,15 +38,31 @@ import io.openems.edge.common.test.DummyComponentContext;
 import io.openems.edge.common.test.DummyComponentManager;
 import io.openems.edge.common.test.DummyConfigurationAdmin;
 import io.openems.edge.common.user.User;
+import io.openems.edge.core.appmanager.DummyValidator.TestCheckable;
+import io.openems.edge.core.appmanager.dependency.AppConfigValidator;
+import io.openems.edge.core.appmanager.dependency.AppManagerAppHelper;
 import io.openems.edge.core.appmanager.dependency.DependencyUtil;
+import io.openems.edge.core.appmanager.dependency.aggregatetask.ComponentAggregateTask;
+import io.openems.edge.core.appmanager.dependency.aggregatetask.ComponentAggregateTaskImpl;
+import io.openems.edge.core.appmanager.dependency.aggregatetask.PersistencePredictorAggregateTask;
+import io.openems.edge.core.appmanager.dependency.aggregatetask.PersistencePredictorAggregateTaskImpl;
+import io.openems.edge.core.appmanager.dependency.aggregatetask.SchedulerAggregateTask;
+import io.openems.edge.core.appmanager.dependency.aggregatetask.SchedulerAggregateTaskImpl;
+import io.openems.edge.core.appmanager.dependency.aggregatetask.SchedulerByCentralOrderAggregateTask;
+import io.openems.edge.core.appmanager.dependency.aggregatetask.SchedulerByCentralOrderAggregateTaskImpl;
+import io.openems.edge.core.appmanager.dependency.aggregatetask.StaticIpAggregateTask;
+import io.openems.edge.core.appmanager.dependency.aggregatetask.StaticIpAggregateTaskImpl;
+import io.openems.edge.core.appmanager.dependency.aggregatetask.TestScheduler;
 import io.openems.edge.core.appmanager.jsonrpc.AddAppInstance;
 import io.openems.edge.core.appmanager.jsonrpc.AddAppInstance.Request;
 import io.openems.edge.core.appmanager.jsonrpc.DeleteAppInstance;
 import io.openems.edge.core.appmanager.jsonrpc.UpdateAppInstance;
+import io.openems.edge.core.appmanager.validator.CheckAppsNotInstalled;
 import io.openems.edge.core.appmanager.validator.CheckCardinality;
-import io.openems.edge.core.appmanager.validator.CheckRelayCount;
+import io.openems.edge.core.appmanager.validator.CheckHome;
 import io.openems.edge.core.appmanager.validator.Checkable;
 import io.openems.edge.core.appmanager.validator.Validator;
+import io.openems.edge.core.appmanager.validator.relaycount.CheckRelayCount;
 
 public class AppManagerTestBundle {
 
@@ -55,11 +71,16 @@ public class AppManagerTestBundle {
 	public final ComponentUtil componentUtil;
 	public final Validator validator;
 
+	public final DummyAppManagerAppHelper appHelper;
 	public final AppManagerImpl sut;
 	public final AppManagerUtil appManagerUtil;
 	public final AppCenterBackendUtil appCenterBackendUtil;
 
+	private final AppValidateWorker appValidateWorker;
+
 	public final CheckablesBundle checkablesBundle;
+
+	public final TestScheduler scheduler;
 
 	public AppManagerTestBundle(JsonObject initialComponentConfig, MyConfig initialAppManagerConfig,
 			Function<AppManagerTestBundle, List<OpenemsApp>> availableAppsSupplier) throws Exception {
@@ -135,7 +156,7 @@ public class AppManagerTestBundle {
 		this.cm.getOrCreateEmptyConfiguration(
 				this.componentManger.getEdgeConfig().getComponent("scheduler0").get().getPid());
 
-		this.componentUtil = new ComponentUtilImpl(this.componentManger, this.cm);
+		this.componentUtil = new ComponentUtilImpl(this.componentManger);
 
 		this.sut = new AppManagerImpl() {
 
@@ -158,7 +179,7 @@ public class AppManagerTestBundle {
 			}
 
 			@Override
-			public CompletableFuture<AddAppInstance.Response> handleAddAppInstanceRequest(User user, Request request,
+			public AddAppInstance.Response handleAddAppInstanceRequest(User user, Request request,
 					boolean ignoreBackend) throws OpenemsNamedException {
 				final var response = super.handleAddAppInstanceRequest(user, request, ignoreBackend);
 				this.modifyWithCurrentConfig();
@@ -166,7 +187,7 @@ public class AppManagerTestBundle {
 			}
 
 			@Override
-			public CompletableFuture<? extends JsonrpcResponseSuccess> handleDeleteAppInstanceRequest(User user,
+			public DeleteAppInstance.Response handleDeleteAppInstanceRequest(User user,
 					DeleteAppInstance.Request request) throws OpenemsNamedException {
 				final var response = super.handleDeleteAppInstanceRequest(user, request);
 				this.modifyWithCurrentConfig();
@@ -174,7 +195,7 @@ public class AppManagerTestBundle {
 			}
 
 			@Override
-			public CompletableFuture<UpdateAppInstance.Response> handleUpdateAppInstanceRequest(User user,
+			public UpdateAppInstance.Response handleUpdateAppInstanceRequest(User user,
 					UpdateAppInstance.Request request) throws OpenemsNamedException {
 				final var response = super.handleUpdateAppInstanceRequest(user, request);
 				this.modifyWithCurrentConfig();
@@ -205,37 +226,52 @@ public class AppManagerTestBundle {
 
 		ReflectionUtils.setAttribute(this.appManagerUtil.getClass(), this.appManagerUtil, "appManager", this.sut);
 
-		this.checkablesBundle = new CheckablesBundle(
+		this.checkablesBundle = new CheckablesBundle(//
+				new TestCheckable(), //
 				new CheckCardinality(this.sut, this.appManagerUtil,
 						getComponentContext(CheckCardinality.COMPONENT_NAME)), //
-				new CheckRelayCount(this.componentUtil, getComponentContext(CheckRelayCount.COMPONENT_NAME), null) //
+				new CheckRelayCount(this.componentUtil, getComponentContext(CheckRelayCount.COMPONENT_NAME), null), //
+				new CheckAppsNotInstalled(this.sut, getComponentContext(CheckAppsNotInstalled.COMPONENT_NAME)), //
+				new CheckHome(this.componentManger, getComponentContext(CheckHome.COMPONENT_NAME),
+						new CheckAppsNotInstalled(this.sut, getComponentContext(CheckAppsNotInstalled.COMPONENT_NAME))) //
 		);
 
 		var dummyValidator = new DummyValidator();
 		dummyValidator.setCheckables(this.checkablesBundle.all());
 		this.validator = dummyValidator;
 
-		final var csoAppManagerAppHelper = DummyAppManagerAppHelper.cso(this.componentManger, this.componentUtil,
-				this.validator, this.appManagerUtil);
+		this.appHelper = new DummyAppManagerAppHelper(this.componentManger, this.componentUtil, this.appManagerUtil);
+		final var csoAppManagerAppHelper = cso((AppManagerAppHelper) this.appHelper);
 
-		final var appManagerAppHelper = csoAppManagerAppHelper.getService();
+		this.appValidateWorker = new AppValidateWorker();
+		final var appConfigValidator = new AppConfigValidator();
+
+		ReflectionUtils.setAttribute(AppValidateWorker.class, this.appValidateWorker, "appManagerUtil",
+				this.appManagerUtil);
+		ReflectionUtils.setAttribute(AppValidateWorker.class, this.appValidateWorker, "validator", appConfigValidator);
+
+		ReflectionUtils.setAttribute(AppConfigValidator.class, appConfigValidator, "appManagerUtil",
+				this.appManagerUtil);
+		ReflectionUtils.setAttribute(AppConfigValidator.class, appConfigValidator, "tasks", this.appHelper.getTasks());
 
 		// use this so the appManagerAppHelper does not has to be a OpenemsComponent and
 		// the attribute can still be private
-		ReflectionUtils.setAttribute(appManagerAppHelper.getClass(), appManagerAppHelper, "appManager", this.sut);
-		ReflectionUtils.setAttribute(appManagerAppHelper.getClass(), appManagerAppHelper, "appManagerUtil",
-				this.appManagerUtil);
+		ReflectionUtils.setAttribute(this.appHelper.getClass(), this.appHelper, "appManager", this.sut);
+		ReflectionUtils.setAttribute(this.appHelper.getClass(), this.appHelper, "appManagerUtil", this.appManagerUtil);
 
-		ReflectionUtils.setAttribute(DependencyUtil.class, null, "appHelper", appManagerAppHelper);
+		ReflectionUtils.setAttribute(DependencyUtil.class, null, "appHelper", this.appHelper);
 
 		new ComponentTest(this.sut) //
 				.addReference("cm", this.cm) //
 				.addReference("componentManager", this.componentManger) //
 				.addReference("csoAppManagerAppHelper", csoAppManagerAppHelper) //
 				.addReference("validator", this.validator) //
+				.addReference("appValidateWorker", this.appValidateWorker) //
 				.addReference("backendUtil", this.appCenterBackendUtil) //
 				.addReference("availableApps", availableAppsSupplier.apply(this)) //
 				.activate(initialAppManagerConfig);
+
+		this.scheduler = new TestScheduler(this.componentManger);
 	}
 
 	/**
@@ -267,12 +303,11 @@ public class AppManagerTestBundle {
 	 * @throws Exception on error
 	 */
 	public void assertNoValidationErrors() throws Exception {
-		var worker = new AppValidateWorker(this.sut);
-		worker.validateApps();
+		this.appValidateWorker.validateApps();
 
 		// should not have found defective Apps
-		if (!worker.defectiveApps.isEmpty()) {
-			throw new Exception(worker.defectiveApps.entrySet().stream() //
+		if (!this.appValidateWorker.defectiveApps.isEmpty()) {
+			throw new Exception(this.appValidateWorker.defectiveApps.entrySet().stream() //
 					.map(e -> e.getKey() + "[" + e.getValue() + "]") //
 					.collect(Collectors.joining("|")));
 		}
@@ -351,15 +386,76 @@ public class AppManagerTestBundle {
 		}
 	}
 
-	public static class CheckablesBundle {
+	/**
+	 * Adds a {@link ComponentAggregateTask} to the current active tasks.
+	 * 
+	 * @return the created {@link ComponentAggregateTask}
+	 */
+	public ComponentAggregateTask addComponentAggregateTask() {
+		final var componentAggregateTask = new ComponentAggregateTaskImpl(this.componentManger);
+		this.appHelper.addAggregateTask(componentAggregateTask);
+		return componentAggregateTask;
+	}
 
-		public final CheckCardinality checkCardinality;
-		public final CheckRelayCount checkRelayCount;
+	/**
+	 * Adds a {@link SchedulerAggregateTask} to the current active tasks.
+	 * 
+	 * @param componentAggregateTask the {@link ComponentAggregateTask}
+	 * @return the created {@link SchedulerAggregateTask}
+	 */
+	public SchedulerAggregateTask addSchedulerAggregateTask(ComponentAggregateTask componentAggregateTask) {
+		final var schedulerAggregateTaskImpl = new SchedulerAggregateTaskImpl(componentAggregateTask,
+				this.componentUtil);
+		this.appHelper.addAggregateTask(schedulerAggregateTaskImpl);
+		return schedulerAggregateTaskImpl;
+	}
 
-		public CheckablesBundle(CheckCardinality checkCardinality, CheckRelayCount checkRelayCount) {
-			this.checkCardinality = checkCardinality;
-			this.checkRelayCount = checkRelayCount;
-		}
+	/**
+	 * Adds a {@link SchedulerByCentralOrderAggregateTask} to the current active
+	 * tasks.
+	 * 
+	 * @param componentAggregateTask the {@link ComponentAggregateTask}
+	 * @return the created {@link SchedulerByCentralOrderAggregateTask}
+	 */
+	public SchedulerByCentralOrderAggregateTask addSchedulerByCentralOrderAggregateTask(
+			ComponentAggregateTask componentAggregateTask) {
+		final var schedulerByCentralOrderAggregateTaskImpl = new SchedulerByCentralOrderAggregateTaskImpl(
+				this.componentManger, this.componentUtil, this.appManagerUtil, componentAggregateTask,
+				new SchedulerByCentralOrderAggregateTaskImpl.ProductionSchedulerOrderDefinition());
+		this.appHelper.addAggregateTask(schedulerByCentralOrderAggregateTaskImpl);
+		return schedulerByCentralOrderAggregateTaskImpl;
+	}
+
+	/**
+	 * Adds a {@link StaticIpAggregateTask} to the current active tasks.
+	 * 
+	 * @return the created {@link StaticIpAggregateTask}
+	 */
+	public StaticIpAggregateTask addStaticIpAggregateTask() {
+		var staticIpAggregateTaskImpl = new StaticIpAggregateTaskImpl(this.componentUtil);
+		this.appHelper.addAggregateTask(staticIpAggregateTaskImpl);
+		return staticIpAggregateTaskImpl;
+	}
+
+	/**
+	 * Adds a {@link PersistencePredictorAggregateTask} to the current active tasks.
+	 * 
+	 * @return the created {@link PersistencePredictorAggregateTask}
+	 */
+	public PersistencePredictorAggregateTask addPersistencePredictorAggregateTask() {
+		final var persistencePredictorAggregateTaskImpl = new PersistencePredictorAggregateTaskImpl(
+				this.componentManger);
+		this.appHelper.addAggregateTask(persistencePredictorAggregateTaskImpl);
+		return persistencePredictorAggregateTaskImpl;
+	}
+
+	public record CheckablesBundle(//
+			DummyValidator.TestCheckable checkTest, //
+			CheckCardinality checkCardinality, //
+			CheckRelayCount checkRelayCount, //
+			CheckAppsNotInstalled checkAppsNotInstalled, //
+			CheckHome checkHome //
+	) {
 
 		/**
 		 * Gets all {@link Checkable}.
@@ -367,8 +463,12 @@ public class AppManagerTestBundle {
 		 * @return the {@link Checkable}
 		 */
 		public final List<Checkable> all() {
-			return Lists.newArrayList(this.checkCardinality, //
-					this.checkRelayCount //
+			return Lists.newArrayList(//
+					this.checkTest(), //
+					this.checkCardinality(), //
+					this.checkRelayCount(), //
+					this.checkAppsNotInstalled(), //
+					this.checkHome() //
 			);
 		}
 	}
@@ -465,6 +565,35 @@ public class AppManagerTestBundle {
 			this.componentManager.setConfigurationAdmin(cm);
 		}
 
+	}
+
+	/**
+	 * Creates a {@link ComponentServiceObjects} of a service.
+	 * 
+	 * @param <T>     the type of the service
+	 * @param service the service
+	 * @return the {@link ComponentServiceObjects}
+	 */
+	public static <T> ComponentServiceObjects<T> cso(T service) {
+		return new ComponentServiceObjects<T>() {
+
+			@Override
+			public T getService() {
+				return service;
+			}
+
+			@Override
+			public void ungetService(T service) {
+				// empty for test
+			}
+
+			@Override
+			public ServiceReference<T> getServiceReference() {
+				// not needed for test
+				return null;
+			}
+
+		};
 	}
 
 }

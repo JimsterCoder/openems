@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DefaultTypes } from 'src/app/shared/service/defaulttypes';
@@ -7,7 +8,7 @@ import { AbstractHistoryWidget } from '../abstracthistorywidget';
 
 @Component({
     selector: GridOptimizedChargeWidgetComponent.SELECTOR,
-    templateUrl: './widget.component.html'
+    templateUrl: './widget.component.html',
 })
 export class GridOptimizedChargeWidgetComponent extends AbstractHistoryWidget implements OnInit, OnChanges, OnDestroy {
 
@@ -27,7 +28,7 @@ export class GridOptimizedChargeWidgetComponent extends AbstractHistoryWidget im
 
     constructor(
         public override service: Service,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
     ) {
         super(service);
     }
@@ -47,14 +48,14 @@ export class GridOptimizedChargeWidgetComponent extends AbstractHistoryWidget im
 
     ngOnChanges() {
         this.updateValues();
-    };
+    }
 
     protected updateValues() {
 
         this.service.getConfig().then(config => {
             this.getChannelAddresses(this.edge, config).then(channels => {
                 this.service.queryEnergy(this.period.from, this.period.to, channels).then(response => {
-                    let result = response.result;
+                    const result = response.result;
                     if (this.componentId + '/DelayChargeTime' in result.data) {
                         this.activeTimeDelayCharge = result.data[this.componentId + '/DelayChargeTime'];
                     }
@@ -75,11 +76,11 @@ export class GridOptimizedChargeWidgetComponent extends AbstractHistoryWidget im
 
     protected getChannelAddresses(edge: Edge, config: EdgeConfig): Promise<ChannelAddress[]> {
         return new Promise((resolve) => {
-            let channeladdresses = [
+            const channeladdresses = [
                 new ChannelAddress(this.componentId, 'DelayChargeTime'),
                 new ChannelAddress(this.componentId, 'SellToGridLimitTime'),
                 new ChannelAddress(this.componentId, 'AvoidLowChargingTime'),
-                new ChannelAddress(this.componentId, 'NoLimitationTime')
+                new ChannelAddress(this.componentId, 'NoLimitationTime'),
             ];
             resolve(channeladdresses);
         });

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ModalController } from '@ionic/angular';
@@ -6,7 +7,7 @@ import { Edge, EdgeConfig, Service, Websocket } from '../../../../../shared/shar
 
 @Component({
   selector: AdministrationComponent.SELECTOR,
-  templateUrl: './administration.component.html'
+  templateUrl: './administration.component.html',
 })
 export class AdministrationComponent implements OnInit {
 
@@ -23,7 +24,7 @@ export class AdministrationComponent implements OnInit {
     public modalCtrl: ModalController,
     public service: Service,
     private websocket: Websocket,
-    public translate: TranslateService
+    public translate: TranslateService,
   ) { }
 
   ngOnInit() {
@@ -36,7 +37,7 @@ export class AdministrationComponent implements OnInit {
 
   updateZoeMode(event: CustomEvent) {
     let newValue = this.evcsComponent.properties['minHwCurrent'];
-    let oldValue = this.evcsComponent.properties['minHwCurrent'];
+    const oldValue = this.evcsComponent.properties['minHwCurrent'];
 
     if (event.detail.checked == true) {
       newValue = 10000;
@@ -46,7 +47,7 @@ export class AdministrationComponent implements OnInit {
 
     if (this.edge != null && oldValue != newValue) {
       this.edge.updateComponentConfig(this.websocket, this.evcsComponent.id, [
-        { name: 'minHwCurrent', value: newValue }
+        { name: 'minHwCurrent', value: newValue },
       ]).then(() => {
         this.evcsComponent.properties.minHwCurrent = newValue;
         this.service.toast(this.translate.instant('General.changeAccepted'), 'success');

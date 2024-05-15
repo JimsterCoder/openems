@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { ChangeDetectorRef, Component, Inject } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -11,7 +12,7 @@ import { PopoverComponent } from '../popover/popover';
 
 type ChargeMode = 'FORCE_CHARGE' | 'EXCESS_POWER';
 @Component({
-  templateUrl: './modal.html'
+  templateUrl: './modal.html',
 })
 export class ModalComponent extends AbstractModal {
 
@@ -75,17 +76,17 @@ export class ModalComponent extends AbstractModal {
       new ChannelAddress(this.component.id, 'MinimumHardwarePower'),
       new ChannelAddress(this.component.id, 'MaximumHardwarePower'),
       new ChannelAddress(this.component.id, 'SetChargePowerLimit'),
-      new ChannelAddress(this.controller.id, '_PropertyChargeMode'),
-      new ChannelAddress(this.controller.id, '_PropertyEnabledCharging'),
-      new ChannelAddress(this.controller.id, '_PropertyDefaultChargeMinPower')
+      new ChannelAddress(this.controller?.id, '_PropertyChargeMode'),
+      new ChannelAddress(this.controller?.id, '_PropertyEnabledCharging'),
+      new ChannelAddress(this.controller?.id, '_PropertyDefaultChargeMinPower'),
     ];
   }
 
   protected override onCurrentData(currentData: CurrentData) {
     this.isConnectionSuccessful = currentData.allComponents[this.component.id + '/State'] !== 3 ? true : false;
-    // Do not change values after touching formControls 
+    // Do not change values after touching formControls
     if (this.formGroup?.pristine) {
-      this.status = this.getState(currentData.allComponents[this.component.id + "/Status"], currentData.allComponents[this.component.id + "/Plug"]);
+      this.status = this.getState(this.controller ? currentData.allComponents[this.controller.id + "/_PropertyEnabledCharging"] === 1 : null, currentData.allComponents[this.component.id + "/Status"], currentData.allComponents[this.component.id + "/Plug"]);
       this.chargePower = Utils.convertChargeDischargePower(this.translate, currentData.allComponents[this.component.id + "/ChargePower"]);
       this.chargePowerLimit = Utils.CONVERT_TO_WATT(this.formatNumber(currentData.allComponents[this.component.id + "/SetChargePowerLimit"]));
       this.state = currentData.allComponents[this.component.id + "/Status"];
@@ -93,7 +94,7 @@ export class ModalComponent extends AbstractModal {
       this.minChargePower = this.formatNumber(currentData.allComponents[this.component.id + '/MinimumHardwarePower']);
       this.maxChargePower = this.formatNumber(currentData.allComponents[this.component.id + '/MaximumHardwarePower']);
       this.numberOfPhases = currentData.allComponents[this.component.id + '/Phases'] ? currentData.allComponents[this.component.id + '/Phases'] : 3;
-      this.defaultChargeMinPower = currentData.allComponents[this.controller.id + '/_PropertyDefaultChargeMinPower'];
+      this.defaultChargeMinPower = currentData.allComponents[this.controller?.id + '/_PropertyDefaultChargeMinPower'];
     }
   }
 
@@ -141,17 +142,17 @@ export class ModalComponent extends AbstractModal {
 
   protected override getFormGroup(): FormGroup {
     return this.formBuilder.group({
-      chargeMode: new FormControl(this.controller.properties.enabledCharging == false ? 'OFF' : this.controller.properties.chargeMode),
-      energyLimit: new FormControl(this.controller.properties.energySessionLimit > 0),
-      minGuarantee: new FormControl(this.controller.properties.defaultChargeMinPower > 0),
-      defaultChargeMinPower: new FormControl(this.controller.properties.defaultChargeMinPower),
-      forceChargeMinPower: new FormControl(this.controller.properties.forceChargeMinPower),
-      priority: new FormControl(this.controller.properties.priority),
+      chargeMode: new FormControl(this.controller?.properties.enabledCharging == false ? 'OFF' : this.controller?.properties.chargeMode),
+      energyLimit: new FormControl(this.controller?.properties.energySessionLimit > 0),
+      minGuarantee: new FormControl(this.controller?.properties.defaultChargeMinPower > 0),
+      defaultChargeMinPower: new FormControl(this.controller?.properties.defaultChargeMinPower),
+      forceChargeMinPower: new FormControl(this.controller?.properties.forceChargeMinPower),
+      priority: new FormControl(this.controller?.properties.priority),
       // EnergySessionLimit as Wh value
-      energySessionLimit: new FormControl(this.controller.properties.energySessionLimit),
+      energySessionLimit: new FormControl(this.controller?.properties.energySessionLimit),
       // EnergySessionLimit as kWh value, for ion-range
-      energySessionLimitKwh: new FormControl(Math.round(this.controller.properties.energySessionLimit / 1000)),
-      enabledCharging: new FormControl(this.isChargingEnabled)
+      energySessionLimitKwh: new FormControl(Math.round(this.controller?.properties.energySessionLimit / 1000)),
+      enabledCharging: new FormControl(this.isChargingEnabled),
     });
   }
 
@@ -162,7 +163,7 @@ export class ModalComponent extends AbstractModal {
      */
   protected updateForceMinPower(event: CustomEvent, currentController: EdgeConfig.Component, numberOfPhases: number) {
 
-    let newMinChargePower = event.detail.value / numberOfPhases;
+    const newMinChargePower = event.detail.value / numberOfPhases;
     this.formGroup.controls['forceChargeMinPower'].markAsDirty();
     this.formGroup.controls['forceChargeMinPower'].setValue(newMinChargePower);
   }
@@ -171,16 +172,16 @@ export class ModalComponent extends AbstractModal {
  * Updates the MinChargePower for Renault Zoe Charging Mode if activated in administration component
  */
   protected updateRenaultZoeConfig() {
-    if (this.evcsComponent.properties['minHwCurrent'] == 10000) {
+    if (this.controller && this.evcsComponent.properties['minHwCurrent'] == 10000) {
 
-      let oldMinChargePower = this.controller.properties.forceChargeMinPower;
-      let maxAllowedChargePower = 10 /* Ampere */ * 230; /* Volt */
+      const oldMinChargePower = this.controller.properties.forceChargeMinPower;
+      const maxAllowedChargePower = 10 /* Ampere */ * 230; /* Volt */
 
       if (oldMinChargePower < maxAllowedChargePower) {
         if (this.edge != null) {
-          let newMinChargePower = maxAllowedChargePower;
+          const newMinChargePower = maxAllowedChargePower;
           this.edge.updateComponentConfig(this.websocket, this.controller.id, [
-            { name: 'forceChargeMinPower', value: newMinChargePower }
+            { name: 'forceChargeMinPower', value: newMinChargePower },
           ]).then(() => {
             this.controller.properties.forceChargeMinPower = newMinChargePower;
           }).catch(reason => {
@@ -194,16 +195,15 @@ export class ModalComponent extends AbstractModal {
 
   /**
   * Returns the state of the EVCS
-  * 
+  *
   * @param state the state
   * @param plug the plug
-  * 
+  *
   */
-  private getState(state: number, plug: number): string {
-    if (this.controller != null) {
-      if (this.controller.properties.enabledCharging != null && this.controller.properties.enabledCharging == false) {
-        return this.translate.instant('Edge.Index.Widgets.EVCS.chargingStationDeactivated');
-      }
+  private getState(enabledCharging: boolean, state: number, plug: number): string {
+
+    if (enabledCharging === false) {
+      return this.translate.instant('Edge.Index.Widgets.EVCS.chargingStationDeactivated');
     }
 
     if (plug == null) {
@@ -235,7 +235,7 @@ export class ModalComponent extends AbstractModal {
   }
 
   protected formatNumber(i: number) {
-    let round = Math.ceil(i / 100) * 100;
+    const round = Math.ceil(i / 100) * 100;
     return round;
   }
 
@@ -243,8 +243,8 @@ export class ModalComponent extends AbstractModal {
     const popover = await this.popoverctrl.create({
       component: PopoverComponent,
       componentProps: {
-        chargeMode: this.formGroup.controls['chargeMode'].value
-      }
+        chargeMode: this.formGroup.controls['chargeMode'].value,
+      },
     });
     return await popover.present();
   }
@@ -254,8 +254,8 @@ export class ModalComponent extends AbstractModal {
       component: AdministrationComponent,
       componentProps: {
         evcsComponent: this.evcsComponent,
-        edge: this.edge
-      }
+        edge: this.edge,
+      },
     });
     modal.onDidDismiss().then(() => {
       this.updateRenaultZoeConfig();

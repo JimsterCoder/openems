@@ -6,7 +6,7 @@ import { Role } from 'src/app/shared/type/role';
 
 @Component({
     selector: 'oe-electricity-meter',
-    templateUrl: './modal.component.html'
+    templateUrl: './modal.component.html',
 })
 export class ElectricityMeterComponent extends AbstractModalLine implements OnInit {
 
@@ -17,16 +17,16 @@ export class ElectricityMeterComponent extends AbstractModalLine implements OnIn
     protected readonly phases: { key: string, name: string, power: number | null, current: number | null, voltage: number | null }[] = [
         { key: "L1", name: "", power: null, current: null, voltage: null },
         { key: "L2", name: "", power: null, current: null, voltage: null },
-        { key: "L3", name: "", power: null, current: null, voltage: null }
+        { key: "L3", name: "", power: null, current: null, voltage: null },
     ];
 
     protected override getChannelAddresses(): ChannelAddress[] {
-        let channelAddresses: ChannelAddress[] = [];
-        for (let phase of [1, 2, 3]) {
+        const channelAddresses: ChannelAddress[] = [];
+        for (const phase of [1, 2, 3]) {
             channelAddresses.push(
                 new ChannelAddress(this.component.id, 'CurrentL' + phase),
                 new ChannelAddress(this.component.id, 'VoltageL' + phase),
-                new ChannelAddress(this.component.id, 'ActivePowerL' + phase)
+                new ChannelAddress(this.component.id, 'ActivePowerL' + phase),
             );
         }
         return channelAddresses;
@@ -34,7 +34,7 @@ export class ElectricityMeterComponent extends AbstractModalLine implements OnIn
 
     protected override onCurrentData(currentData: CurrentData): void {
         this.phases.forEach((phase) => {
-            var power = currentData.allComponents[this.component.id + '/ActivePower' + phase.key];
+            const power = currentData.allComponents[this.component.id + '/ActivePower' + phase.key];
             phase.name = "Phase " + phase.key;
             phase.power = Utils.absSafely(power);
             phase.current = currentData.allComponents[this.component.id + '/Current' + phase.key];

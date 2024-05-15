@@ -8,18 +8,14 @@ import { FlatComponent } from './flat/flat';
 @NgModule({
   imports: [
     BrowserModule,
-    SharedModule
-  ],
-  entryComponents: [
-    FlatComponent,
-    ChartComponent
+    SharedModule,
   ],
   declarations: [
     FlatComponent,
-    ChartComponent
+    ChartComponent,
   ],
   exports: [
-    FlatComponent
-  ]
+    FlatComponent,
+  ],
 })
 export class CommonEnergyMonitor { }

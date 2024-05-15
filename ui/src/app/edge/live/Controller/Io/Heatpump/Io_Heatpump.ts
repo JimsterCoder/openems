@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { Component } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { AbstractFlatWidget } from 'src/app/shared/genericComponents/flat/abstract-flat-widget';
@@ -7,7 +8,7 @@ import { Controller_Io_HeatpumpModalComponent } from './modal/modal.component';
 
 @Component({
   selector: 'Controller_Io_Heatpump',
-  templateUrl: './Io_Heatpump.html'
+  templateUrl: './Io_Heatpump.html',
 })
 export class Controller_Io_HeatpumpComponent extends AbstractFlatWidget {
 
@@ -23,7 +24,7 @@ export class Controller_Io_HeatpumpComponent extends AbstractFlatWidget {
     return [
       new ChannelAddress(this.component.id, 'Status'),
       new ChannelAddress(this.component.id, 'State'),
-      new ChannelAddress(this.component.id, Controller_Io_HeatpumpComponent.PROPERTY_MODE)
+      new ChannelAddress(this.component.id, Controller_Io_HeatpumpComponent.PROPERTY_MODE),
     ];
   }
 
@@ -67,8 +68,8 @@ export class Controller_Io_HeatpumpComponent extends AbstractFlatWidget {
       componentProps: {
         edge: this.edge,
         component: this.component,
-        status: this.status
-      }
+        status: this.status,
+      },
     });
     modal.onDidDismiss().then(() => {
       this.service.getConfig().then(config => {

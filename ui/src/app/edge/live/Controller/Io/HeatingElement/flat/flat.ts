@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { Component } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { AbstractFlatWidget } from 'src/app/shared/genericComponents/flat/abstract-flat-widget';
@@ -8,7 +9,7 @@ import { ModalComponent } from '../modal/modal';
 
 @Component({
     selector: 'Controller_Io_HeatingElement',
-    templateUrl: './flat.html'
+    templateUrl: './flat.html',
 })
 export class FlatComponent extends AbstractFlatWidget {
 
@@ -31,15 +32,15 @@ export class FlatComponent extends AbstractFlatWidget {
             ChannelAddress.fromString(
                 this.component.properties['outputChannelPhaseL2']),
             ChannelAddress.fromString(
-                this.component.properties['outputChannelPhaseL3'])
+                this.component.properties['outputChannelPhaseL3']),
         );
 
-        let channelAddresses: ChannelAddress[] = [
+        const channelAddresses: ChannelAddress[] = [
             new ChannelAddress(this.component.id, 'ForceStartAtSecondsOfDay'),
             ...this.outputChannelArray,
             new ChannelAddress(this.component.id, 'Status'),
             new ChannelAddress(this.component.id, FlatComponent.PROPERTY_MODE),
-            new ChannelAddress(this.component.id, '_PropertyWorkMode')
+            new ChannelAddress(this.component.id, '_PropertyWorkMode'),
         ];
         return channelAddresses;
     }
@@ -93,8 +94,8 @@ export class FlatComponent extends AbstractFlatWidget {
         const modal = await this.modalController.create({
             component: ModalComponent,
             componentProps: {
-                component: this.component
-            }
+                component: this.component,
+            },
         });
         return await modal.present();
     }

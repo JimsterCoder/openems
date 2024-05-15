@@ -1,11 +1,11 @@
 package io.openems.edge.core.appmanager;
 
+import static io.openems.edge.common.test.DummyUser.DUMMY_ADMIN;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
@@ -15,31 +15,32 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 
 import io.openems.common.exceptions.OpenemsError.OpenemsNamedException;
-import io.openems.common.session.Language;
-import io.openems.common.session.Role;
 import io.openems.common.utils.JsonUtils;
+import io.openems.common.utils.ReflectionUtils;
 import io.openems.edge.app.evcs.KebaEvcs;
 import io.openems.edge.common.test.ComponentTest;
 import io.openems.edge.common.test.DummyComponentContext;
 import io.openems.edge.common.test.DummyComponentManager;
 import io.openems.edge.common.test.DummyConfigurationAdmin;
-import io.openems.edge.common.test.DummyUser;
-import io.openems.edge.common.user.User;
 import io.openems.edge.core.appmanager.AppManagerTestBundle.CheckablesBundle;
+import io.openems.edge.core.appmanager.DummyValidator.TestCheckable;
+import io.openems.edge.core.appmanager.dependency.AppManagerAppHelper;
 import io.openems.edge.core.appmanager.jsonrpc.AddAppInstance;
 import io.openems.edge.core.appmanager.jsonrpc.DeleteAppInstance;
+import io.openems.edge.core.appmanager.validator.CheckAppsNotInstalled;
 import io.openems.edge.core.appmanager.validator.CheckCardinality;
-import io.openems.edge.core.appmanager.validator.CheckRelayCount;
+import io.openems.edge.core.appmanager.validator.CheckHome;
+import io.openems.edge.core.appmanager.validator.relaycount.CheckRelayCount;
 
 public class AppManagerImpSynchronizationTest {
-
-	private final User user = new DummyUser("id", "password", Language.DEFAULT, Role.ADMIN);
 
 	private AppManagerImpl appManager;
 
 	@Before
 	public void before() throws Exception {
 		this.appManager = new AppManagerImpl();
+		ReflectionUtils.setAttribute(AppManagerImpl.class, this.appManager, "appValidateWorker",
+				new AppValidateWorker());
 		assertTrue(this.appManager.lockModifyingApps.tryLock());
 		this.appManager.lockModifyingApps.unlock();
 		assertFalse(this.appManager.waitingForModified);
@@ -64,23 +65,32 @@ public class AppManagerImpSynchronizationTest {
 
 		// create config for scheduler
 		cm.getOrCreateEmptyConfiguration(componentManager.getEdgeConfig().getComponent("scheduler0").get().getPid());
-		final var componentUtil = new ComponentUtilImpl(componentManager, cm);
+		final var componentUtil = new ComponentUtilImpl(componentManager);
 		final var appManagerUtil = new AppManagerUtilImpl(componentManager);
 		final var validator = new DummyValidator();
 
-		final var checkablesBundle = new CheckablesBundle(
+		final var checkablesBundle = new CheckablesBundle(//
+				new TestCheckable(), //
 				new CheckCardinality(this.appManager, appManagerUtil,
 						AppManagerTestBundle.getComponentContext(CheckCardinality.COMPONENT_NAME)), //
 				new CheckRelayCount(componentUtil,
-						AppManagerTestBundle.getComponentContext(CheckRelayCount.COMPONENT_NAME), null) //
+						AppManagerTestBundle.getComponentContext(CheckRelayCount.COMPONENT_NAME), null), //
+				new CheckAppsNotInstalled(this.appManager,
+						AppManagerTestBundle.getComponentContext(CheckAppsNotInstalled.COMPONENT_NAME)), //
+				new CheckHome(this.appManager.componentManager,
+						AppManagerTestBundle.getComponentContext(CheckHome.COMPONENT_NAME),
+						new CheckAppsNotInstalled(this.appManager,
+								AppManagerTestBundle.getComponentContext(CheckAppsNotInstalled.COMPONENT_NAME))) //
 		);
 
 		validator.setCheckables(checkablesBundle.all());
+
 		new ComponentTest(this.appManager) //
 				.addReference("cm", cm) //
 				.addReference("componentManager", componentManager) //
 				.addReference("csoAppManagerAppHelper",
-						DummyAppManagerAppHelper.cso(componentManager, componentUtil, validator, appManagerUtil)) //
+						AppManagerTestBundle.<AppManagerAppHelper>cso(
+								new DummyAppManagerAppHelper(componentManager, componentUtil, appManagerUtil))) //
 				.addReference("validator", validator) //
 				.addReference("backendUtil", new DummyAppCenterBackendUtil()) //
 				.addReference("availableApps", Lists.newArrayList(//
@@ -99,7 +109,7 @@ public class AppManagerImpSynchronizationTest {
 	@Test
 	public void testInstallationOfNotAvailableApp() throws Exception {
 		try {
-			this.appManager.handleAddAppInstanceRequest(this.user,
+			this.appManager.handleAddAppInstanceRequest(DUMMY_ADMIN,
 					new AddAppInstance.Request("someAppId", "key", "alias", JsonUtils.buildJsonObject() //
 							.build()));
 		} catch (OpenemsNamedException e) {
@@ -115,7 +125,8 @@ public class AppManagerImpSynchronizationTest {
 	@Test
 	public void testRemoveOfNotAvailableInstance() throws Exception {
 		try {
-			this.appManager.handleDeleteAppInstanceRequest(this.user, new DeleteAppInstance.Request(UUID.randomUUID()));
+			this.appManager.handleDeleteAppInstanceRequest(DUMMY_ADMIN,
+					new DeleteAppInstance.Request(UUID.randomUUID()));
 		} catch (OpenemsNamedException e) {
 			// expected
 		}
@@ -128,10 +139,9 @@ public class AppManagerImpSynchronizationTest {
 
 	@Test
 	public void testSimulateAfterInstallaion() throws Exception {
-		this.appManager.handleAddAppInstanceRequest(this.user,
+		this.appManager.handleAddAppInstanceRequest(DUMMY_ADMIN,
 				new AddAppInstance.Request("App.PvInverter.SolarEdge", "key", "alias", JsonUtils.buildJsonObject() //
-						.build()))
-				.get();
+						.build()));
 
 		assertTrue(this.appManager.lockModifyingApps.tryLock());
 		assertTrue(this.appManager.waitingForModified);
@@ -142,21 +152,19 @@ public class AppManagerImpSynchronizationTest {
 	@Test
 	@Ignore
 	public void testSimulateLockWaitingForModification() throws Exception {
-		this.appManager.handleAddAppInstanceRequest(this.user,
+		this.appManager.handleAddAppInstanceRequest(DUMMY_ADMIN,
 				new AddAppInstance.Request("App.PvInverter.SolarEdge", "key", "alias", JsonUtils.buildJsonObject() //
-						.build()))
-				.get();
+						.build()));
 
 		assertTrue(this.appManager.waitingForModified);
 
 		final var second = CompletableFuture.supplyAsync(() -> {
 			try {
-				return this.appManager.handleAddAppInstanceRequest(this.user,
+				return this.appManager.handleAddAppInstanceRequest(DUMMY_ADMIN,
 						new AddAppInstance.Request("App.PvInverter.SolarEdge", "key", "alias",
 								JsonUtils.buildJsonObject() //
-										.build()))
-						.get();
-			} catch (InterruptedException | ExecutionException | OpenemsNamedException e) {
+										.build()));
+			} catch (OpenemsNamedException e) {
 				throw new RuntimeException(e);
 			}
 		});
