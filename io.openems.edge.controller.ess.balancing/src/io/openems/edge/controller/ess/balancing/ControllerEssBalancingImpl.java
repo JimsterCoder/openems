@@ -91,7 +91,8 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 		var calculatedPower = calculateRequiredPower(//
 				this.ess.getActivePower().getOrError(), //
 				this.meter.getActivePower().getOrError(), //
-				this.config.targetGridSetpoint());
+				this.config.targetGridSetpoint(), //
+				50);
 
 		/*
 		 * set result
@@ -110,7 +111,7 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 	 * @param targetGridSetpoint the configured targetGridSetpoint
 	 * @return the required power
 	 */
-	protected static int calculateRequiredPower(int essPower, int gridPower, int targetGridSetpoint) {
-		return gridPower + essPower - targetGridSetpoint;
+	protected static int calculateRequiredPower(int essPower, int gridPower, int targetGridSetpoint, int fudgeSellMore) {
+		return gridPower + essPower +fudgeSellMore - targetGridSetpoint;
 	}
 }
