@@ -112,6 +112,7 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 	 * @return the required power
 	 */
 	protected static int calculateRequiredPower(int essPower, int gridPower, int targetGridSetpoint, int fudgeSellMore) {
-		return gridPower + essPower +fudgeSellMore - targetGridSetpoint;
+		int newsetting = gridPower + essPower +fudgeSellMore - targetGridSetpoint;
+		return newsetting;
 	}
 }

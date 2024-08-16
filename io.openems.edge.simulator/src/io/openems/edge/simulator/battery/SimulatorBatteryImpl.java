@@ -65,7 +65,8 @@ public class SimulatorBatteryImpl extends AbstractOpenemsComponent
 		this.chargeMaxVoltage = config.chargeMaxVoltage();
 		this.disChargeMaxCurrent = config.disChargeMaxCurrent();
 		this.chargeMaxCurrent = config.chargeMaxCurrent();
-		this.soc = readSOCFromFile(true);
+		this.soc = config.capacityKWh();
+//		this.soc = readSOCFromFile(true);
 		this.soh = config.soh();
 		this.temperature = config.temperature();
 		this.capacityKWh = config.capacityKWh();
@@ -131,7 +132,8 @@ public class SimulatorBatteryImpl extends AbstractOpenemsComponent
 		this._setChargeMaxVoltage(this.chargeMaxVoltage);
 		this._setDischargeMaxCurrent(this.disChargeMaxCurrent);
 		this._setChargeMaxCurrent(this.chargeMaxCurrent);
-		this._setSoc(readSOCFromFile());
+//		this._setSoc(readSOCFromFile());
+		this._setSoc(this.capacityKWh);
 		this._setSoh(this.soh);
 		this._setMinCellTemperature(this.temperature);
 		this._setMaxCellTemperature(this.temperature);
