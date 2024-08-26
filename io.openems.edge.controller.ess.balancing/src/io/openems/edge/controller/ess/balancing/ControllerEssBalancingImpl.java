@@ -25,7 +25,7 @@ import io.openems.edge.meter.api.ElectricityMeter;
 		configurationPolicy = ConfigurationPolicy.REQUIRE //
 )
 public class ControllerEssBalancingImpl extends AbstractOpenemsComponent implements Controller, OpenemsComponent {
-
+	
 	private final Logger log = LoggerFactory.getLogger(ControllerEssBalancingImpl.class);
 
 	@Reference
@@ -84,22 +84,99 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 		case OFF_GRID:
 			return;
 		}
+		double buy = 0.0; // $/kWh
+		double sell = 0.0;				
+		// ************************************************************************************
+		if (this.config.targetGridSetpoint() >= 77 && this.config.targetGridSetpoint() <= 79) {
+			if (this.config.targetGridSetpoint() == 77) {
+				buy = 0.2276; // $/kWh
+				sell = 0.1438;				
+			}
+			else if (this.config.targetGridSetpoint() == 78) {
+				buy = 0.3187; // $/kWh
+				sell = 0.1438;				
+			}
+			if (this.config.targetGridSetpoint() == 79) {
+				buy = 0.4553; // $/kWh
+				sell = 0.1438;				
+			}
+			int[] meterW = new int[3];
+			double[] cost = new double[3];
+			// get meter readings
+			meterW[0] = this.meter.getActivePowerL1().getOrError();
+			meterW[1] = this.meter.getActivePowerL2().getOrError();
+			meterW[2] = this.meter.getActivePowerL3().getOrError();
+			
+			int inverter_power = this.ess.getActivePower().getOrError();
 
+			// calculate cost on each phase
+			double consumedPower = 0;
+			double costT = 0;
+			for (int i = 0; i < 3; i++) {
+				if (meterW[i] > 0) {
+		          cost[i] = meterW[i] * buy / 1000.0;
+		          consumedPower += meterW[i] + inverter_power / 3.0;
+				} else {	
+					cost[i] = meterW[i] * sell / 1000.0;
+				}
+				// total cost
+				costT += cost[i];
+			}
+		
+		  double costPerkWh;
+		  if (consumedPower > 0) {
+		      costPerkWh = costT * 1000.0 / consumedPower;
+		  } else {
+		      costPerkWh = 0;
+		  }
+		
+		  // only act if cost is outside a set value $/kWh
+		  double costdesired = 0.05;
+		  double costrange = 0.01;
+		  double maxcost = costdesired + costrange;
+		  double mincost = costdesired - costrange;
+		
+		  if (costPerkWh > maxcost) {
+		      // increase inverter power
+		      inverter_power += 100;
+		
+		  } else if (costPerkWh < mincost) {
+		      // decrease inverter power
+		  // note: we never want to buy power (inverter setting should never be negative)
+		  // this could happen when solar power exceeds consumption
+		      if (inverter_power > 100) {
+		          inverter_power -= 100;
+		      }
+		  }
+		  
+		  // double check we aren't buying
+		      if (inverter_power < 0) {
+		        inverter_power = 0;
+		      }
+		
+		  this.ess.setActivePowerEquals(inverter_power);
+				this.ess.setReactivePowerEquals(0);
+		}
+		// ************************************************************************************
+		
 		/*
 		 * Calculates required charge/discharge power
 		 */
-		var calculatedPower = calculateRequiredPower(//
-				this.ess.getActivePower().getOrError(), //
-				this.meter.getActivePower().getOrError(), //
-				this.config.targetGridSetpoint(), //
-				50);
-
-		/*
-		 * set result
-		 */
-		// this.ess.setActivePowerEqualsWithPid(calculatedPower);
-		this.ess.setActivePowerEquals(calculatedPower);
-		this.ess.setReactivePowerEquals(0);
+		else {
+			var calculatedPower = calculateRequiredPower(//
+					this.ess.getActivePower().getOrError(), //
+					this.meter.getActivePower().getOrError(), //
+					this.config.targetGridSetpoint(), //
+					50);
+			/*
+			 * set result
+			 */
+			// this.ess.setActivePowerEqualsWithPid(calculatedPower);
+			this.ess.setActivePowerEquals(calculatedPower);
+			this.ess.setReactivePowerEquals(0);
+			
+		}
+		
 	}
 
 	/**
