@@ -38,6 +38,8 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 	private ElectricityMeter meter;
 
 	private Config config;
+	
+	private double costTotal;
 
 	public ControllerEssBalancingImpl() {
 		super(//
@@ -87,16 +89,24 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 		double buy = 0.0; // $/kWh
 		double sell = 0.0;				
 		// ************************************************************************************
-		if (this.config.targetGridSetpoint() >= 77 && this.config.targetGridSetpoint() <= 79) {
-			if (this.config.targetGridSetpoint() == 77) {
+		if (this.config.targetGridSetpoint() == 23 ||
+				this.config.targetGridSetpoint() == 32 ||
+				this.config.targetGridSetpoint() == 36 ||
+				this.config.targetGridSetpoint() == 46) {
+			
+			if (this.config.targetGridSetpoint() == 23) {
 				buy = 0.2276; // $/kWh
-				sell = 0.1438;				
+				sell = 0.1438;
 			}
-			else if (this.config.targetGridSetpoint() == 78) {
+			else if (this.config.targetGridSetpoint() == 32) {
 				buy = 0.3187; // $/kWh
 				sell = 0.1438;				
 			}
-			if (this.config.targetGridSetpoint() == 79) {
+			else if (this.config.targetGridSetpoint() == 36) {
+				buy = 0.3565; // $/kWh
+				sell = 0.08;				
+			}
+			if (this.config.targetGridSetpoint() == 46) {
 				buy = 0.4553; // $/kWh
 				sell = 0.1438;				
 			}
@@ -110,37 +120,38 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 			int inverter_power = this.ess.getActivePower().getOrError();
 
 			// calculate cost on each phase
-			double consumedPower = 0;
+//			double consumedPower = 0;
 			double costT = 0;
 			for (int i = 0; i < 3; i++) {
 				if (meterW[i] > 0) {
 		          cost[i] = meterW[i] * buy / 1000.0;
-		          consumedPower += meterW[i] + inverter_power / 3.0;
+//		          consumedPower += meterW[i] + inverter_power / 3.0;
 				} else {	
 					cost[i] = meterW[i] * sell / 1000.0;
 				}
 				// total cost
 				costT += cost[i];
 			}
+			costTotal = costT;
 		
-		  double costPerkWh;
-		  if (consumedPower > 0) {
-		      costPerkWh = costT * 1000.0 / consumedPower;
-		  } else {
-		      costPerkWh = 0;
-		  }
+//		  double costPerkWh;
+//		  if (consumedPower > 0) {
+//		      costPerkWh = costT * 1000.0 / consumedPower;
+//		  } else {
+//		      costPerkWh = 0;
+//		  }
 		
 		  // only act if cost is outside a set value $/kWh
-		  double costdesired = 0.05;
-		  double costrange = 0.01;
+		  double costdesired = 0.04;
+		  double costrange = 0.02;
 		  double maxcost = costdesired + costrange;
 		  double mincost = costdesired - costrange;
 		
-		  if (costPerkWh > maxcost) {
+		  if (costT > maxcost) {
 		      // increase inverter power
 		      inverter_power += 100;
 		
-		  } else if (costPerkWh < mincost) {
+		  } else if (costT < mincost) {
 		      // decrease inverter power
 		  // note: we never want to buy power (inverter setting should never be negative)
 		  // this could happen when solar power exceeds consumption
@@ -191,5 +202,14 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 	protected static int calculateRequiredPower(int essPower, int gridPower, int targetGridSetpoint, int fudgeSellMore) {
 		int newsetting = gridPower + essPower +fudgeSellMore - targetGridSetpoint;
 		return newsetting;
+	}
+	@Override
+	public String debugLog() {
+		if (this.isEnabled()) {
+			return String.format("Cost:%.3f $", costTotal);
+		}
+		else {
+			return null;
+		}
 	}
 }
