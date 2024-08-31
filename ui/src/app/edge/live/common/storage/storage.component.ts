@@ -162,6 +162,17 @@ export class StorageComponent extends AbstractFlatWidget {
         }
     }
 
+    public convertEnergy = (value: any): string => {
+        if (value == null) {
+            return '-';
+        }
+
+        let thisValue: number = value;
+
+        // Round thisValue to Integer when decimal place equals 0 
+        return formatNumber(thisValue, 'de', '1.0-1') + " kWh";
+    }
+
     /**
       * Use 'convertChargePower' to convert/map a value
       * 
