@@ -45,11 +45,12 @@ public class SimulatorBatteryImpl extends AbstractOpenemsComponent
 	private int soh;
 	private int temperature;
 	private int capacityKWh;
+	private int staticCapacityKWh;
 	private int voltage;
 	private int minCellVoltage; // in mV
 	private boolean readSOC;
 	// system stops discharge at minSOC
-//	private int minSOC = 5;
+	private int minSOC;
 	
 	public SimulatorBatteryImpl() {
 		super(//
@@ -68,11 +69,12 @@ public class SimulatorBatteryImpl extends AbstractOpenemsComponent
 		this.disChargeMaxCurrent = config.disChargeMaxCurrent();
 		this.chargeMaxCurrent = config.chargeMaxCurrent();
 		// see comment below
-		// this.soc = (int)(1000.0 * ((readSOCFromFile(true) -minSOC) / 100.0 * config.capacityKWh()));
 		this.soc = readSOCFromFile(true);
+    this.minSOC = 5;
+		this.capacityKWh = (int)((this.soc - this.minSOC) / 100.0 * config.capacityKWh());
+		this.staticCapacityKWh = config.capacityKWh();
 		this.soh = config.soh();
 		this.temperature = config.temperature();
-		this.capacityKWh = config.capacityKWh();
 		this.voltage = config.voltage();
 		this.minCellVoltage = config.minCellVoltage_mV();
 		this.readSOC = false;
@@ -128,8 +130,7 @@ public class SimulatorBatteryImpl extends AbstractOpenemsComponent
 		}
 		return this.soc;
 	}
-		
-	
+			
 	private void updateChannels() {
 		this._setDischargeMinVoltage(this.disChargeMinVoltage);
 		this._setChargeMaxVoltage(this.chargeMaxVoltage);
@@ -138,12 +139,12 @@ public class SimulatorBatteryImpl extends AbstractOpenemsComponent
 		// calculate usable energy remaining using minSOC (static, set above)
 		// and battery capacity, which is set in SimulatorBattery apache interface (only set an integer!)
 		// 1000x because the component expects the value in watts
-		// this._setSoc((int)(1000.0 * ((readSOCFromFile() - minSOC) / 100.0 * this.capacityKWh)));
 		this._setSoc(readSOCFromFile());
+		this.capacityKWh = (int)((this.soc -minSOC) / 100.0 * this.staticCapacityKWh);
+		 this._setCapacity(this.capacityKWh);
 		this._setSoh(this.soh);
 		this._setMinCellTemperature(this.temperature);
 		this._setMaxCellTemperature(this.temperature);
-		this._setCapacity(this.capacityKWh);
 
 		this._setVoltage(this.voltage);
 		this._setMinCellVoltage(this.minCellVoltage);
