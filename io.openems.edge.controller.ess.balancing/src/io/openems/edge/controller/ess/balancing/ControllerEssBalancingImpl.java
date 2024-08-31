@@ -136,8 +136,8 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 			}
 		
 		  // only act if cost is outside a set value $/kWh
-		  double costdesired = 0.04;
-		  double costrange = 0.02;
+		  double costdesired = 0.005;
+		  double costrange = 0.005;
 		  double maxcost = costdesired + costrange;
 		  double mincost = costdesired - costrange;
 		  

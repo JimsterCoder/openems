@@ -49,7 +49,7 @@ public class SimulatorBatteryImpl extends AbstractOpenemsComponent
 	private int minCellVoltage; // in mV
 	private boolean readSOC;
 	// system stops discharge at minSOC
-	private int minSOC = 5;
+//	private int minSOC = 5;
 	
 	public SimulatorBatteryImpl() {
 		super(//
@@ -68,7 +68,8 @@ public class SimulatorBatteryImpl extends AbstractOpenemsComponent
 		this.disChargeMaxCurrent = config.disChargeMaxCurrent();
 		this.chargeMaxCurrent = config.chargeMaxCurrent();
 		// see comment below
-		this.soc = (int)(1000.0 * ((readSOCFromFile(true) -minSOC) / 100.0 * config.capacityKWh()));
+		// this.soc = (int)(1000.0 * ((readSOCFromFile(true) -minSOC) / 100.0 * config.capacityKWh()));
+		this.soc = readSOCFromFile(true);
 		this.soh = config.soh();
 		this.temperature = config.temperature();
 		this.capacityKWh = config.capacityKWh();
@@ -137,7 +138,8 @@ public class SimulatorBatteryImpl extends AbstractOpenemsComponent
 		// calculate usable energy remaining using minSOC (static, set above)
 		// and battery capacity, which is set in SimulatorBattery apache interface (only set an integer!)
 		// 1000x because the component expects the value in watts
-		this._setSoc((int)(1000.0 * ((readSOCFromFile() - minSOC) / 100.0 * this.capacityKWh)));
+		// this._setSoc((int)(1000.0 * ((readSOCFromFile() - minSOC) / 100.0 * this.capacityKWh)));
+		this._setSoc(readSOCFromFile());
 		this._setSoh(this.soh);
 		this._setMinCellTemperature(this.temperature);
 		this._setMaxCellTemperature(this.temperature);
