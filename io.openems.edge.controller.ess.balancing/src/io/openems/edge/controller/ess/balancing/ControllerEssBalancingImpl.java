@@ -89,25 +89,25 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 		double buy = 0.0; // $/kWh
 		double sell = 0.0;				
 		// ************************************************************************************
-		if (this.config.targetGridSetpoint() == 23 ||
+		if (this.config.targetGridSetpoint() == 27 ||
 				this.config.targetGridSetpoint() == 32 ||
 				this.config.targetGridSetpoint() == 36 ||
-				this.config.targetGridSetpoint() == 46) {
+				this.config.targetGridSetpoint() == 54) {
 			
-			if (this.config.targetGridSetpoint() == 23) {
-				buy = 0.2276; // $/kWh
+			if (this.config.targetGridSetpoint() == 27) {
+				buy = 0.270365; // $/kWh
 				sell = 0.1438;
 			}
 			else if (this.config.targetGridSetpoint() == 32) {
-				buy = 0.3187; // $/kWh
+				buy = 0.32453; // $/kWh
 				sell = 0.1438;				
 			}
 			else if (this.config.targetGridSetpoint() == 36) {
 				buy = 0.3565; // $/kWh
 				sell = 0.08;				
 			}
-			if (this.config.targetGridSetpoint() == 46) {
-				buy = 0.4553; // $/kWh
+			if (this.config.targetGridSetpoint() == 54) {
+				buy = 0.540845; // $/kWh
 				sell = 0.1438;				
 			}
 			int[] meterW = new int[3];
