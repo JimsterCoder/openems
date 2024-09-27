@@ -136,7 +136,7 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 			}
 		
 		  // only act if cost is outside a set value $/kWh
-		  double costdesired = -0.005;
+		  double costdesired = -0.035;
 		  double costrange = 0.005;
 		  double maxcost = costdesired + costrange;
 		  double mincost = costdesired - costrange;
@@ -163,8 +163,8 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 			  // this is an ODD problem here as the inverter can only be 0 or 400 and nothing in between
 			  // (if set to 100, it goes to 400), so if it's on 400 it will never go to 0
 			  // when it is told to set to 300, it stays at 400.
-			  if (((costTotal < 0) && (inverter_power == 400)) ||
-            ((costTotal < 0) && ((inverter_power/2.0) > consumedPower))) {
+			  if (((costTotal < mincost) && (inverter_power == 400)) ||
+            ((costTotal < mincost) && ((inverter_power * 0.4) > consumedPower))) {
 				  inverter_power = 0;
 			  }
 			  else if (inverter_power > 100) {
