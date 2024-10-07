@@ -39,6 +39,7 @@ import io.openems.edge.common.component.OpenemsComponent;
 import io.openems.edge.common.modbusslave.ModbusSlave;
 import io.openems.edge.common.modbusslave.ModbusSlaveTable;
 import io.openems.edge.common.taskmanager.Priority;
+import io.openems.edge.ess.api.ManagedSymmetricEss;
 import io.openems.edge.meter.api.ElectricityMeter;
 import io.openems.edge.meter.api.MeterType;
 import java.util.IntSummaryStatistics;
@@ -57,7 +58,10 @@ public class MeterMicrocareSdm630Impl extends AbstractOpenemsModbusComponent
 	@Reference
 	private ConfigurationAdmin cm;
 	
-  private IntSummaryStatistics[] PowerData = new IntSummaryStatistics[3];
+	@Reference
+	private ManagedSymmetricEss ess;
+	
+  private IntSummaryStatistics[] PowerData = new IntSummaryStatistics[4];
   {
     // Instantiate each element in the array
     for (int i = 0; i < PowerData.length; i++) {
@@ -206,6 +210,8 @@ public class MeterMicrocareSdm630Impl extends AbstractOpenemsModbusComponent
       PowerData[0].accept(this.getActivePowerL1().get());
       PowerData[1].accept(this.getActivePowerL2().get());
       PowerData[2].accept(this.getActivePowerL3().get());
+      // inverter power
+      PowerData[3].accept(this.ess.getActivePower().get());
           
       LocalDateTime getsec = LocalDateTime.now();
       int second = getsec.getSecond();
