@@ -42,7 +42,6 @@ import io.openems.edge.common.taskmanager.Priority;
 import io.openems.edge.meter.api.ElectricityMeter;
 import io.openems.edge.meter.api.MeterType;
 import java.util.IntSummaryStatistics;
-import java.util.LongSummaryStatistics;
 
 @Designate(ocd = Config.class, factory = true)
 @Component(//
@@ -59,14 +58,10 @@ public class MeterMicrocareSdm630Impl extends AbstractOpenemsModbusComponent
 	private ConfigurationAdmin cm;
 	
   private IntSummaryStatistics[] PowerData = new IntSummaryStatistics[3];
-  private LongSummaryStatistics[] EnergyData = new LongSummaryStatistics[2];
   {
     // Instantiate each element in the array
     for (int i = 0; i < PowerData.length; i++) {
         PowerData[i] = new IntSummaryStatistics();
-    }
-    for (int i = 0; i < EnergyData.length; i++) {
-        EnergyData[i] = new LongSummaryStatistics();
     }
   }
    
@@ -203,8 +198,7 @@ public class MeterMicrocareSdm630Impl extends AbstractOpenemsModbusComponent
 	@Override
 	public String debugLog() {
 		RecordData();
-		// return "L:" + this.getActivePower().asString();
-    return "L:" + String.valueOf( PowerData[0].getAverage());
+		return "L:" + this.getActivePower().asString();
 	}
 
 	private void RecordData() {
@@ -213,34 +207,40 @@ public class MeterMicrocareSdm630Impl extends AbstractOpenemsModbusComponent
       PowerData[1].accept(this.getActivePowerL2().get());
       PowerData[2].accept(this.getActivePowerL3().get());
           
-      EnergyData[0].accept(this.getActiveConsumptionEnergy().get());
-      EnergyData[1].accept(this.getActiveProductionEnergy().get());
-          
-      // Get the current date and time
-      LocalDateTime now = LocalDateTime.now();
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-      String formattedDateTime = now.format(formatter);
+      LocalDateTime getsec = LocalDateTime.now();
+      int second = getsec.getSecond();
+      // Check if we are at the top of the minute (00 seconds)
+      if (second == 0) {
+          LocalDateTime now = LocalDateTime.now();
+          DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+          String formattedDateTime = now.format(formatter);
+          // Path to the output file
+          Path filePath = Paths.get("/home/pi/openems/MeterDataSDM630.txt");
+          // Prepare the text to write
+          String text = "\"" + formattedDateTime + "\",";
+          for (int i = 0; i < PowerData.length; i++) {
+              text += "\"" + String.format("%.0f",PowerData[i].getAverage() ) + "\",";
+              text += "\"" + String.valueOf( PowerData[i].getMin() ) + "\",";
+              text += "\"" + String.valueOf( PowerData[i].getMax() ) + "\",";
+          }
+          text += "\"" + String.valueOf(this.getActiveConsumptionEnergy().get()) + "\",";
+          text += "\"" + String.valueOf(this.getActiveProductionEnergy().get()) + "\"\n";
 
-      // Path to the output file
-      Path filePath = Paths.get("/home/pi/openems/MeterDataSDM630.txt");
+          try {
+              // Write to the file, appending the text (if file exists)
+              Files.write(filePath, text.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+          } catch (IOException e) {
+              System.out.println("An error occurred while writing to the file.");
+              // e.printStackTrace();
+          }
 
-      // Prepare the text to write
-      String text = "Current Date and Time: " + formattedDateTime + "\n";
+          // reinitialize power values (according to ChatGTP,this doesn't leak memory)
+          for (int i = 0; i < PowerData.length; i++) {
+            PowerData[i] = new IntSummaryStatistics();
+          }
 
-      try {
-          // Write to the file, appending the text (if file exists)
-          Files.write(filePath, text.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-      } catch (IOException e) {
-          System.out.println("An error occurred while writing to the file.");
-          e.printStackTrace();
       }
-        
-        
-
-		
 	}
-	
-	
 	
 	@Override
 	public ModbusSlaveTable getModbusSlaveTable(AccessMode accessMode) {
