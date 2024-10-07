@@ -3,7 +3,15 @@ package io.openems.edge.meter.microcare.sdm630;
 import static io.openems.edge.bridge.modbus.api.ElementToChannelConverter.DIRECT_1_TO_1;
 import static io.openems.edge.bridge.modbus.api.ElementToChannelConverter.SCALE_FACTOR_3;
 
+import java.io.IOException;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
@@ -33,6 +41,8 @@ import io.openems.edge.common.modbusslave.ModbusSlaveTable;
 import io.openems.edge.common.taskmanager.Priority;
 import io.openems.edge.meter.api.ElectricityMeter;
 import io.openems.edge.meter.api.MeterType;
+import java.util.IntSummaryStatistics;
+import java.util.LongSummaryStatistics;
 
 @Designate(ocd = Config.class, factory = true)
 @Component(//
@@ -47,7 +57,19 @@ public class MeterMicrocareSdm630Impl extends AbstractOpenemsModbusComponent
 
 	@Reference
 	private ConfigurationAdmin cm;
-
+	
+  private IntSummaryStatistics[] PowerData = new IntSummaryStatistics[3];
+  private LongSummaryStatistics[] EnergyData = new LongSummaryStatistics[2];
+  {
+    // Instantiate each element in the array
+    for (int i = 0; i < PowerData.length; i++) {
+        PowerData[i] = new IntSummaryStatistics();
+    }
+    for (int i = 0; i < EnergyData.length; i++) {
+        EnergyData[i] = new LongSummaryStatistics();
+    }
+  }
+   
 	@Override
 	@Reference(policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY, cardinality = ReferenceCardinality.MANDATORY)
 	protected void setModbus(BridgeModbus modbus) {
@@ -180,9 +202,46 @@ public class MeterMicrocareSdm630Impl extends AbstractOpenemsModbusComponent
 
 	@Override
 	public String debugLog() {
-		return "L:" + this.getActivePower().asString();
+		RecordData();
+		// return "L:" + this.getActivePower().asString();
+    return "L:" + String.valueOf( PowerData[0].getAverage());
 	}
 
+	private void RecordData() {
+      // this is called every 1 second
+      PowerData[0].accept(this.getActivePowerL1().get());
+      PowerData[1].accept(this.getActivePowerL2().get());
+      PowerData[2].accept(this.getActivePowerL3().get());
+          
+      EnergyData[0].accept(this.getActiveConsumptionEnergy().get());
+      EnergyData[1].accept(this.getActiveProductionEnergy().get());
+          
+      // Get the current date and time
+      LocalDateTime now = LocalDateTime.now();
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+      String formattedDateTime = now.format(formatter);
+
+      // Path to the output file
+      Path filePath = Paths.get("/home/pi/openems/MeterDataSDM630.txt");
+
+      // Prepare the text to write
+      String text = "Current Date and Time: " + formattedDateTime + "\n";
+
+      try {
+          // Write to the file, appending the text (if file exists)
+          Files.write(filePath, text.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+      } catch (IOException e) {
+          System.out.println("An error occurred while writing to the file.");
+          e.printStackTrace();
+      }
+        
+        
+
+		
+	}
+	
+	
+	
 	@Override
 	public ModbusSlaveTable getModbusSlaveTable(AccessMode accessMode) {
 		return new ModbusSlaveTable(//
@@ -190,4 +249,6 @@ public class MeterMicrocareSdm630Impl extends AbstractOpenemsModbusComponent
 				ElectricityMeter.getModbusSlaveNatureTable(accessMode) //
 		);
 	}
+	
+
 }
