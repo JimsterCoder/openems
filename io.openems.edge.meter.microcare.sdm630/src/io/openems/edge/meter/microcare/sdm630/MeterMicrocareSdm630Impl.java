@@ -211,9 +211,8 @@ public class MeterMicrocareSdm630Impl extends AbstractOpenemsModbusComponent
       int second = getsec.getSecond();
       // Check if we are at the top of the minute (00 seconds)
       if (second == 0) {
-          LocalDateTime now = LocalDateTime.now();
           DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-          String formattedDateTime = now.format(formatter);
+          String formattedDateTime = getsec.format(formatter);
           // Path to the output file
           Path filePath = Paths.get("/home/pi/openems/MeterDataSDM630.txt");
           // Prepare the text to write
