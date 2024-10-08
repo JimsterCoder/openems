@@ -60,7 +60,8 @@ public class MeterMicrocareSdm630Impl extends AbstractOpenemsModbusComponent
 	
 	@Reference
 	private ManagedSymmetricEss ess;
-	
+	private int PrevMinute;
+
   private IntSummaryStatistics[] PowerData = new IntSummaryStatistics[4];
   {
     // Instantiate each element in the array
@@ -213,12 +214,14 @@ public class MeterMicrocareSdm630Impl extends AbstractOpenemsModbusComponent
       // inverter power
       PowerData[3].accept(this.ess.getActivePower().get());
           
-      LocalDateTime getsec = LocalDateTime.now();
-      int second = getsec.getSecond();
-      // Check if we are at the top of the minute (00 seconds)
-      if (second == 0) {
+      LocalDateTime gettime = LocalDateTime.now();
+      
+      int thisminute = gettime.getMinute();
+      // see if this is a new minute
+      if (PrevMinute != thisminute) {
+    	  PrevMinute = thisminute;
           DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-          String formattedDateTime = getsec.format(formatter);
+          String formattedDateTime = gettime.format(formatter);
           // Path to the output file
           Path filePath = Paths.get("/home/pi/openems/MeterDataSDM630.txt");
           // Prepare the text to write
