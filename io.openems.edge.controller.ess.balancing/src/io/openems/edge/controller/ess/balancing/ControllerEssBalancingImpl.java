@@ -130,7 +130,7 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 				}
 				// total cost
 				costTotal += cost[i];
-        // calculate power actually consummed by the site
+        // calculate power actually consumed by the site
         // the meter reading plus power supplied by the inverter
 				consumedPower += meterW[i] + inverter_power / 3.0;
 			}
@@ -163,8 +163,8 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 			  // this is an ODD problem here as the inverter can only be 0 or 400 and nothing in between
 			  // (if set to 100, it goes to 400), so if it's on 400 it will never go to 0
 			  // when it is told to set to 300, it stays at 400.
-			  if (((costTotal < mincost) && (inverter_power == 400)) ||
-            ((costTotal < mincost) && ((inverter_power * 0.4) > consumedPower))) {
+			  if ((costTotal < mincost) && (inverter_power == 400)) {
+//			  if (((costTotal < mincost) && (inverter_power == 400)) || ((costTotal < mincost) && ((inverter_power * 0.4) > consumedPower))) {
 				  inverter_power = 0;
 			  }
 			  else if (inverter_power > 100) {
