@@ -40,6 +40,10 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 	private Config config;
 	
 	private double costTotal;
+	private int[] meterW = new int[3];
+	private int inverter_power_IN; 
+	private int inverter_power_OUT; 
+	private int control;
 
 	public ControllerEssBalancingImpl() {
 		super(//
@@ -87,7 +91,16 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 			return;
 		}
 		double buy = 0.0; // $/kWh
-		double sell = 0.0;				
+		double sell = 0.0;	
+		control = 0;
+
+		// get meter readings
+		meterW[0] = this.meter.getActivePowerL1().getOrError();
+		meterW[1] = this.meter.getActivePowerL2().getOrError();
+		meterW[2] = this.meter.getActivePowerL3().getOrError();
+		
+		inverter_power_IN = this.ess.getActivePower().getOrError();
+		inverter_power_OUT = inverter_power_IN;
 		// ************************************************************************************
 		if (this.config.targetGridSetpoint() == 27 ||
 				this.config.targetGridSetpoint() == 32 ||
@@ -110,14 +123,7 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 				buy = 0.540845; // $/kWh
 				sell = 0.1438;				
 			}
-			int[] meterW = new int[3];
 			double[] cost = new double[3];
-			// get meter readings
-			meterW[0] = this.meter.getActivePowerL1().getOrError();
-			meterW[1] = this.meter.getActivePowerL2().getOrError();
-			meterW[2] = this.meter.getActivePowerL3().getOrError();
-			
-			int inverter_power = this.ess.getActivePower().getOrError();
 
 			// calculate cost on each phase
 			double consumedPower = 0;
@@ -132,7 +138,7 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 				costTotal += cost[i];
         // calculate power actually consumed by the site
         // the meter reading plus power supplied by the inverter
-				consumedPower += meterW[i] + inverter_power / 3.0;
+				consumedPower += meterW[i] + inverter_power_OUT / 3.0;
 			}
 		
 		  // only act if cost is outside a set value $/kWh
@@ -146,16 +152,19 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 			  // if the cost is more than 10c greater than desired
 			  // make a larger change
 			  deltapower = 200;
+			  control = 1;
 		  }
 		
 		  if (consumedPower < 0) {
 			  // if we are not consuming power, we don't need the battery
 			  // (power is coming from solar)
-			  inverter_power = 0;	
+			  inverter_power_OUT = 0;	
+			  control = 2;
 		  }
 		  else if (costTotal > maxcost) {
 		      // increase inverter power
-		      inverter_power += deltapower;
+		      inverter_power_OUT += deltapower;
+			  control = 3;
 		
 		  }
 		  else if (costTotal < mincost) {
@@ -163,21 +172,24 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 			  // this is an ODD problem here as the inverter can only be 0 or 400 and nothing in between
 			  // (if set to 100, it goes to 400), so if it's on 400 it will never go to 0
 			  // when it is told to set to 300, it stays at 400.
-			  if ((costTotal < mincost) && (inverter_power == 400)) {
+			  if ((costTotal < mincost) && (inverter_power_OUT == 400)) {
 //			  if (((costTotal < mincost) && (inverter_power == 400)) || ((costTotal < mincost) && ((inverter_power * 0.4) > consumedPower))) {
-				  inverter_power = 0;
+				  inverter_power_OUT = 0;
+				  control = 4;
 			  }
-			  else if (inverter_power > 100) {
-		          inverter_power -= 100;
+			  else if (inverter_power_OUT > 100) {
+		          inverter_power_OUT -= 100;
+				  control = 5;
 		      }
 		  }
 		  
 		  // double check we aren't buying
-		      if (inverter_power < 0) {
-		        inverter_power = 0;
+		      if (inverter_power_OUT < 0) {
+		        inverter_power_OUT = 0;
+		        control = 6;
 		      }
 		
-		  this.ess.setActivePowerEquals(inverter_power);
+		  this.ess.setActivePowerEquals(inverter_power_OUT);
 				this.ess.setReactivePowerEquals(0);
 		}
 		// ************************************************************************************
@@ -218,7 +230,8 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 	@Override
 	public String debugLog() {
 		if (this.isEnabled()) {
-			return String.format("Cost:%.3f $", costTotal);
+//			return String.format("Cost:%.3f $", costTotal);
+			return String.format("Cost:$%.3f L1 %d  L2 %d  L3 %d  in %d  out %d  x %d", costTotal, meterW[0], meterW[1], meterW[2], inverter_power_IN, inverter_power_OUT, control );
 		}
 		else {
 			return null;
