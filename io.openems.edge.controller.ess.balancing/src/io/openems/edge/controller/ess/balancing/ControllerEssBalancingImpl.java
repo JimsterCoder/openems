@@ -44,6 +44,7 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 	private int inverter_power_IN; 
 	private int inverter_power_OUT; 
 	private int control;
+	private int deltapower;
 
 	public ControllerEssBalancingImpl() {
 		super(//
@@ -147,13 +148,23 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 		  double maxcost = costdesired + costrange;
 		  double mincost = costdesired - costrange;
 		  
-		  int deltapower = 100;
+		  deltapower = 100;
 		  if ((costTotal - costdesired) > 0.20) {
-			  // if the cost is more than 10c greater than desired
 			  // make a larger change
 			  deltapower = 200;
 			  control = 1;
 		  }
+		  else if ((costTotal - costdesired) < -0.10) {
+			  // make a larger change
+			  deltapower = 300;
+			  control = 1;
+		  }
+		  else if ((costTotal - costdesired) < -0.20) {
+			  // make a larger change
+			  deltapower = 1000;
+			  control = 1;
+		  }
+		  
 		
 		  if (consumedPower < 0) {
 			  // if we are not consuming power, we don't need the battery
@@ -178,7 +189,9 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 				  control = 4;
 			  }
 			  else if (inverter_power_OUT > 100) {
-		          inverter_power_OUT -= 100;
+				  // double delta when decreasing
+				  deltapower *= 2;
+		          inverter_power_OUT -= deltapower;
 				  control = 5;
 		      }
 		  }
@@ -231,7 +244,7 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 	public String debugLog() {
 		if (this.isEnabled()) {
 //			return String.format("Cost:%.3f $", costTotal);
-			return String.format("Cost:$%.3f L1 %d  L2 %d  L3 %d  in %d  out %d  x %d", costTotal, meterW[0], meterW[1], meterW[2], inverter_power_IN, inverter_power_OUT, control );
+			return String.format("Cost:$%.3f L1 %d  L2 %d  L3 %d  in %d  out %d  x %d  d %d", costTotal, meterW[0], meterW[1], meterW[2], inverter_power_IN, inverter_power_OUT, control, deltapower );
 		}
 		else {
 			return null;
