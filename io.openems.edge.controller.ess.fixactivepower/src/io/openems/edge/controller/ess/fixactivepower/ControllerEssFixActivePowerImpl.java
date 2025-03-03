@@ -44,6 +44,7 @@ public class ControllerEssFixActivePowerImpl extends AbstractOpenemsComponent
 	private ManagedSymmetricEss ess;
 
 	private Config config;
+	private int inverter_power_IN;
 
 	@Reference(policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY, cardinality = ReferenceCardinality.OPTIONAL)
 	private volatile Timedata timedata = null;
@@ -86,13 +87,14 @@ public class ControllerEssFixActivePowerImpl extends AbstractOpenemsComponent
 	@Override
 	public void run() throws OpenemsNamedException {
 		var isActive = false;
+		inverter_power_IN = this.ess.getActivePower().getOrError();
 		try {
 			isActive = switch (this.config.mode()) {
 			case MANUAL_ON -> {
 				// Apply Active-Power Set-Point
-				var acPower = getAcPower(this.ess, this.config.hybridEssMode(), this.config.power());
-				PowerConstraint.apply(this.ess, this.id(), //
-						this.config.phase(), Pwr.ACTIVE, this.config.relationship(), acPower);
+//				var acPower = getAcPower(this.ess, this.config.hybridEssMode(), this.config.power());
+				var acPower = this.config.power();
+				PowerConstraint.apply(this.ess, this.id(), this.config.phase(), Pwr.ACTIVE, this.config.relationship(), acPower);
 				yield true; // is active
 			}
 
@@ -137,4 +139,13 @@ public class ControllerEssFixActivePowerImpl extends AbstractOpenemsComponent
 	public Timedata getTimedata() {
 		return this.timedata;
 	}
+	
+	public String debugLog() {
+		if (this.isEnabled()) {
+			return String.format("P:%d", inverter_power_IN);
+		}
+		else {
+			return null;
+		}
+	}	
 }

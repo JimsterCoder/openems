@@ -45,6 +45,8 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 	private int inverter_power_OUT; 
 	private int control;
 	private int deltapower;
+	private int newfirmwarefudge = -200;
+	private boolean newfirmware = true;
 
 	public ControllerEssBalancingImpl() {
 		super(//
@@ -105,24 +107,40 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 		// ************************************************************************************
 		if (this.config.targetGridSetpoint() == 27 ||
 				this.config.targetGridSetpoint() == 32 ||
-				this.config.targetGridSetpoint() == 36 ||
-				this.config.targetGridSetpoint() == 54) {
+				this.config.targetGridSetpoint() == 54 ||
+				this.config.targetGridSetpoint() == 270 ||
+				this.config.targetGridSetpoint() == 320 ||
+				this.config.targetGridSetpoint() == 540) {
 			
 			if (this.config.targetGridSetpoint() == 27) {
 				buy = 0.270365; // $/kWh
 				sell = 0.1438;
+				newfirmware = false;
 			}
 			else if (this.config.targetGridSetpoint() == 32) {
 				buy = 0.32453; // $/kWh
 				sell = 0.1438;				
+				newfirmware = false;
 			}
-			else if (this.config.targetGridSetpoint() == 36) {
-				buy = 0.3565; // $/kWh
-				sell = 0.08;				
-			}
-			if (this.config.targetGridSetpoint() == 54) {
+			else if (this.config.targetGridSetpoint() == 54) {
 				buy = 0.540845; // $/kWh
 				sell = 0.1438;				
+				newfirmware = false;
+			}
+			else if (this.config.targetGridSetpoint() == 270) {
+				buy = 0.270365; // $/kWh
+				sell = 0.1438;
+				newfirmware = true;
+			}
+			else if (this.config.targetGridSetpoint() == 320) {
+				buy = 0.32453; // $/kWh
+				sell = 0.1438;				
+				newfirmware = true;
+			}
+			else if (this.config.targetGridSetpoint() == 540) {
+				buy = 0.540845; // $/kWh
+				sell = 0.1438;				
+				newfirmware = true;
 			}
 			double[] cost = new double[3];
 
@@ -189,19 +207,26 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 				  control = 4;
 			  }
 			  else if (inverter_power_OUT > 100) {
-				  // double delta when decreasing
-				  deltapower *= 2;
+				  // decrease inverter power
+				  // triple delta when decreasing
+//				  deltapower *= 1;
 		          inverter_power_OUT -= deltapower;
+		          if (newfirmware) inverter_power_OUT += newfirmwarefudge;
 				  control = 5;
 		      }
 		  }
 		  
 		  // double check we aren't buying
-		      if (inverter_power_OUT < 0) {
-		        inverter_power_OUT = 0;
-		        control = 6;
-		      }
-		
+	      if (inverter_power_OUT < 0) {
+	        inverter_power_OUT = 0;
+	        control = 6;
+	      }
+	
+	      // control the maximum power
+	      if (inverter_power_OUT > 6500) {
+	    	  inverter_power_OUT = 6500;
+	      }
+	      		      
 		  this.ess.setActivePowerEquals(inverter_power_OUT);
 				this.ess.setReactivePowerEquals(0);
 		}
