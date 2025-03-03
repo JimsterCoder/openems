@@ -45,7 +45,7 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 	private int inverter_power_OUT; 
 	private int control;
 	private int deltapower;
-	private int newfirmwarefudge = -200;
+	private int newfirmwarefudge = -300;
 	private boolean newfirmware = true;
 
 	public ControllerEssBalancingImpl() {
