@@ -767,6 +767,10 @@ public class BatteryInverterSinexcelImpl extends AbstractOpenemsModbusComponent
 				new FC6WriteRegisterTask(1024, m(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER, new SignedWordElement(1024), SCALE_FACTOR_2_AND_INVERT)), /* 135 */
 				new FC6WriteRegisterTask(1025, m(BatteryInverterSinexcel.ChannelId.SET_REACTIVE_POWER, new SignedWordElement(1025),	SCALE_FACTOR_2_AND_INVERT)), /*136 */
 
+				new FC6WriteRegisterTask(1028, m(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER_L1, new SignedWordElement(1024), SCALE_FACTOR_2_AND_INVERT)), /* 135 */
+				new FC6WriteRegisterTask(1029, m(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER_L2, new SignedWordElement(1024), SCALE_FACTOR_2_AND_INVERT)), /* 135 */
+				new FC6WriteRegisterTask(1030, m(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER_L3, new SignedWordElement(1024), SCALE_FACTOR_2_AND_INVERT)), /* 135 */
+
         new FC6WriteRegisterTask(1215, m(BatteryInverterSinexcel.ChannelId.BMS_PROTOCOL_SELECTION, new UnsignedWordElement(1215))), /* 330 */
 				new FC6WriteRegisterTask(1216, m(BatteryInverterSinexcel.ChannelId.START_UP_MODE, new UnsignedWordElement(1216))) /* 805 */
 

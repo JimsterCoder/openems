@@ -49,6 +49,17 @@ public interface BatteryInverterSinexcel extends OffGridBatteryInverter, Managed
 		SET_ACTIVE_POWER(Doc.of(OpenemsType.INTEGER) //
 				.accessMode(AccessMode.READ_WRITE)//
 				.unit(Unit.WATT)), //
+
+		SET_ACTIVE_POWER_L1(Doc.of(OpenemsType.INTEGER) //
+				.accessMode(AccessMode.WRITE_ONLY) //
+				.unit(Unit.WATT)), //
+		SET_ACTIVE_POWER_L2(Doc.of(OpenemsType.INTEGER) //
+				.accessMode(AccessMode.WRITE_ONLY) //
+				.unit(Unit.WATT)), //
+		SET_ACTIVE_POWER_L3(Doc.of(OpenemsType.INTEGER) //
+				.accessMode(AccessMode.WRITE_ONLY) //
+				.unit(Unit.WATT)), //
+
 		SET_REACTIVE_POWER(Doc.of(OpenemsType.INTEGER) //
 				.accessMode(AccessMode.READ_WRITE)//
 				.unit(Unit.VOLT_AMPERE_REACTIVE)), //
@@ -570,6 +581,11 @@ public interface BatteryInverterSinexcel extends OffGridBatteryInverter, Managed
 		// To define how the power changes
 		POWER_RISING_MODE(Doc.of(PowerRisingMode.values()) //
 				.accessMode(AccessMode.READ_WRITE)), //
+
+		// 3phase total power control or individual phase power control
+		ENERGY_DISPATCHING_MODE(Doc.of(ActivePowerControlMode.values()) //
+				.accessMode(AccessMode.READ_WRITE)), //
+		
 		// Grid-tied mode only, Volt/Watt control & Freq/Watt control means active power
 		// will be regulated by grid voltage/frequency following a curve/ramp rate given
 		// by HECO or CPUC or other local utility authority codes
