@@ -761,15 +761,16 @@ public class BatteryInverterSinexcelImpl extends AbstractOpenemsModbusComponent
         
         new FC6WriteRegisterTask(1006, m(BatteryInverterSinexcel.ChannelId.SET_GRID_MODE, new UnsignedWordElement(1006))), /* 653 */
 
+        		new FC6WriteRegisterTask(1021, m(BatteryInverterSinexcel.ChannelId.ENERGY_DISPATCHING_MODE, new UnsignedWordElement(1021))), 
 				new FC6WriteRegisterTask(1022, m(BatteryInverterSinexcel.ChannelId.ACTIVE_POWER_CONTROL_MODE, new UnsignedWordElement(1022))), /* 794 */
 				new FC6WriteRegisterTask(1023, m(BatteryInverterSinexcel.ChannelId.REACTIVE_POWER_CONTROL_MODE, new UnsignedWordElement(1023))), /* 792 */
 
 				new FC6WriteRegisterTask(1024, m(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER, new SignedWordElement(1024), SCALE_FACTOR_2_AND_INVERT)), /* 135 */
 				new FC6WriteRegisterTask(1025, m(BatteryInverterSinexcel.ChannelId.SET_REACTIVE_POWER, new SignedWordElement(1025),	SCALE_FACTOR_2_AND_INVERT)), /*136 */
 
-				new FC6WriteRegisterTask(1028, m(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER_L1, new SignedWordElement(1024), SCALE_FACTOR_2_AND_INVERT)), /* 135 */
-				new FC6WriteRegisterTask(1029, m(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER_L2, new SignedWordElement(1024), SCALE_FACTOR_2_AND_INVERT)), /* 135 */
-				new FC6WriteRegisterTask(1030, m(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER_L3, new SignedWordElement(1024), SCALE_FACTOR_2_AND_INVERT)), /* 135 */
+				new FC6WriteRegisterTask(1028, m(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER_L1, new SignedWordElement(1028), SCALE_FACTOR_2_AND_INVERT)), 
+				new FC6WriteRegisterTask(1029, m(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER_L2, new SignedWordElement(1029), SCALE_FACTOR_2_AND_INVERT)), 
+				new FC6WriteRegisterTask(1030, m(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER_L3, new SignedWordElement(1030), SCALE_FACTOR_2_AND_INVERT)), 
 
         new FC6WriteRegisterTask(1215, m(BatteryInverterSinexcel.ChannelId.BMS_PROTOCOL_SELECTION, new UnsignedWordElement(1215))), /* 330 */
 				new FC6WriteRegisterTask(1216, m(BatteryInverterSinexcel.ChannelId.START_UP_MODE, new UnsignedWordElement(1216))) /* 805 */

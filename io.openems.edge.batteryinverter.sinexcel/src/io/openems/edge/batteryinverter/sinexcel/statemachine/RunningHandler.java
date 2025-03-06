@@ -19,7 +19,7 @@ public class RunningHandler extends StateHandler<State, Context> {
 
 		// Mark as started
 		inverter._setStartStop(StartStop.START);
-
+		
 		// Apply Active and Reactive Power Set-Points
 		this.applyPower(context);
 
@@ -38,7 +38,12 @@ public class RunningHandler extends StateHandler<State, Context> {
 		IntegerWriteChannel setActivePower = inverter.channel(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER);
 		setActivePower.setNextWriteValue(context.setActivePower);
 
+		IntegerWriteChannel setActivePowerL1 = inverter.channel(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER_L1);
+		setActivePowerL1.setNextWriteValue(context.setActivePowerL1);
+		
 		IntegerWriteChannel setReactivePower = inverter.channel(BatteryInverterSinexcel.ChannelId.SET_REACTIVE_POWER);
 		setReactivePower.setNextWriteValue(context.setReactivePower);
+	
 	}
+	
 }

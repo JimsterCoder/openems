@@ -39,8 +39,7 @@ public class ErrorHandler extends StateHandler<State, Context> {
 	}
 
 	private void setClearFailureCommand(Context context) throws OpenemsNamedException {
-		BooleanWriteChannel setClearFailureCmd = context.getParent()
-				.channel(BatteryInverterSinexcel.ChannelId.CLEAR_FAILURE);
+		BooleanWriteChannel setClearFailureCmd = context.getParent().channel(BatteryInverterSinexcel.ChannelId.CLEAR_FAILURE);
 		setClearFailureCmd.setNextWriteValue(true); // 1: true, other: illegal
 	}
 }

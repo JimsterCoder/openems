@@ -1,7 +1,9 @@
 package io.openems.edge.batteryinverter.sinexcel.statemachine;
 
 import io.openems.common.exceptions.OpenemsError.OpenemsNamedException;
+import io.openems.edge.batteryinverter.sinexcel.BatteryInverterSinexcel;
 import io.openems.edge.batteryinverter.sinexcel.statemachine.StateMachine.State;
+import io.openems.edge.common.channel.IntegerWriteChannel;
 import io.openems.edge.common.statemachine.StateHandler;
 
 public class GoRunningHandler extends StateHandler<State, Context> {
@@ -30,6 +32,10 @@ public class GoRunningHandler extends StateHandler<State, Context> {
 			break;
 		}
 
+		// set Energy dispatching mode (3ph or individual phase)
+		IntegerWriteChannel setEnergyDispatchingMode = inverter.channel(BatteryInverterSinexcel.ChannelId.ENERGY_DISPATCHING_MODE);
+		setEnergyDispatchingMode.setNextWriteValue(context.setEnergyDispatchingMode );
+		
 		inverter.setStartInverter();
 
 		if (inverter.getInverterState().get() == Boolean.TRUE) {

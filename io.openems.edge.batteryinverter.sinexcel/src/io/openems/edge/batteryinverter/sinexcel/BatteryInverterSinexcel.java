@@ -583,7 +583,7 @@ public interface BatteryInverterSinexcel extends OffGridBatteryInverter, Managed
 				.accessMode(AccessMode.READ_WRITE)), //
 
 		// 3phase total power control or individual phase power control
-		ENERGY_DISPATCHING_MODE(Doc.of(ActivePowerControlMode.values()) //
+		ENERGY_DISPATCHING_MODE(Doc.of(OpenemsType.INTEGER) //
 				.accessMode(AccessMode.READ_WRITE)), //
 		
 		// Grid-tied mode only, Volt/Watt control & Freq/Watt control means active power

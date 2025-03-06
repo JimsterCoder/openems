@@ -11,6 +11,9 @@ public class Context extends AbstractContext<BatteryInverterSinexcelImpl> {
 	protected final TargetGridMode targetGridMode;
 	protected final int setActivePower;
 	protected final int setReactivePower;
+	protected final int setEnergyDispatchingMode;
+	protected final int setZero;
+	protected final int setActivePowerL1;
 
 	public Context(BatteryInverterSinexcelImpl parent, Config config, TargetGridMode targetGridMode, int setActivePower,
 			int setReactivePower) {
@@ -19,6 +22,9 @@ public class Context extends AbstractContext<BatteryInverterSinexcelImpl> {
 		this.targetGridMode = targetGridMode;
 		this.setActivePower = setActivePower;
 		this.setReactivePower = setReactivePower;
+		this.setEnergyDispatchingMode = 0;
+		this.setZero = 0;
+		this.setActivePowerL1 = setActivePower/3;
 	}
 
 }
