@@ -36,13 +36,20 @@ public class RunningHandler extends StateHandler<State, Context> {
 		final var inverter = context.getParent();
 
 		IntegerWriteChannel setActivePower = inverter.channel(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER);
-		setActivePower.setNextWriteValue(context.setActivePower);
+		setActivePower.setNextWriteValue(context.setZero);
+
+		IntegerWriteChannel setReactivePower = inverter.channel(BatteryInverterSinexcel.ChannelId.SET_REACTIVE_POWER);
+		setReactivePower.setNextWriteValue(context.setReactivePower);
 
 		IntegerWriteChannel setActivePowerL1 = inverter.channel(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER_L1);
 		setActivePowerL1.setNextWriteValue(context.setActivePowerL1);
 		
-		IntegerWriteChannel setReactivePower = inverter.channel(BatteryInverterSinexcel.ChannelId.SET_REACTIVE_POWER);
-		setReactivePower.setNextWriteValue(context.setReactivePower);
+		IntegerWriteChannel setActivePowerL2 = inverter.channel(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER_L2);
+		setActivePowerL2.setNextWriteValue(context.setActivePowerL2);
+
+		IntegerWriteChannel setActivePowerL3 = inverter.channel(BatteryInverterSinexcel.ChannelId.SET_ACTIVE_POWER_L3);
+		setActivePowerL3.setNextWriteValue(context.setActivePowerL3);
+
 	
 	}
 	
