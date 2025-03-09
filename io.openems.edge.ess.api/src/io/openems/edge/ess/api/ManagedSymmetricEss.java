@@ -360,21 +360,15 @@ public interface ManagedSymmetricEss extends SymmetricEss {
 	}
 
 	/**
-	 * Gets the Channel for {@link ChannelId#SET_ACTIVE_POWER_EQUALS}.
-	 *
-	 * @return the Channel
-	 */
-	public default IntegerWriteChannel getSetActivePowerEqualsChannel() {
-		return this.channel(ChannelId.SET_ACTIVE_POWER_EQUALS);
-	}
-
-	/**
 	 * Sets an Active Power Equals setpoint in [W]. Negative values for Charge;
 	 * positive for Discharge. See {@link ChannelId#SET_ACTIVE_POWER_EQUALS}.
 	 *
 	 * @param value the next write value
 	 * @throws OpenemsNamedException on error
 	 */
+	public default IntegerWriteChannel getSetActivePowerEqualsChannel() {
+		return this.channel(ChannelId.SET_ACTIVE_POWER_EQUALS);
+	}
 	public default void setActivePowerEquals(Integer value) throws OpenemsNamedException {
 		this.getSetActivePowerEqualsChannel().setNextWriteValue(value);
 	}
@@ -699,7 +693,6 @@ public interface ManagedSymmetricEss extends SymmetricEss {
 	 */
 	public default Constraint addPowerConstraintAndValidate(String description, Phase phase, Pwr pwr,
 			Relationship relationship, double value) throws OpenemsException {
-		return this.getPower()
-				.addConstraintAndValidate(this.createPowerConstraint(description, phase, pwr, relationship, value));
+		return this.getPower().addConstraintAndValidate(this.createPowerConstraint(description, phase, pwr, relationship, value));
 	}
 }

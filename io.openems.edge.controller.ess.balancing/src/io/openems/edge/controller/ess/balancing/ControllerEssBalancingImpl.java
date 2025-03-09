@@ -95,7 +95,6 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 		}
 		double buy = 0.0; // $/kWh
 		double sell = 0.0;	
-		control = 0;
 
 		// get meter readings
 		meterW[0] = this.meter.getActivePowerL1().getOrError();
@@ -104,6 +103,7 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 		
 		inverter_power_IN = this.ess.getActivePower().getOrError();
 		inverter_power_OUT = inverter_power_IN;
+		
 		// ************************************************************************************
 		if (this.config.targetGridSetpoint() == 27 ||
 				this.config.targetGridSetpoint() == 32 ||
@@ -161,26 +161,27 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 			}
 		
 		  // only act if cost is outside a set value $/kWh
-		  double costdesired = -0.035;
+		  double costdesired = -0.010;
 		  double costrange = 0.005;
 		  double maxcost = costdesired + costrange;
 		  double mincost = costdesired - costrange;
 		  
-		  deltapower = 100;
+		  control = 0;
+		  deltapower = 300;
 		  if ((costTotal - costdesired) > 0.20) {
 			  // make a larger change
-			  deltapower = 200;
+			  deltapower = 500;
 			  control = 1;
 		  }
 		  else if ((costTotal - costdesired) < -0.10) {
 			  // make a larger change
 			  deltapower = 300;
-			  control = 1;
+			  control = 2;
 		  }
 		  else if ((costTotal - costdesired) < -0.20) {
 			  // make a larger change
 			  deltapower = 1000;
-			  control = 1;
+			  control = 3;
 		  }
 		  
 		
@@ -188,12 +189,12 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 			  // if we are not consuming power, we don't need the battery
 			  // (power is coming from solar)
 			  inverter_power_OUT = 0;	
-			  control = 2;
+			  control = 4;
 		  }
 		  else if (costTotal > maxcost) {
 		      // increase inverter power
 		      inverter_power_OUT += deltapower;
-			  control = 3;
+			  control = 5;
 		
 		  }
 		  else if (costTotal < mincost) {
@@ -201,34 +202,38 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 			  // this is an ODD problem here as the inverter can only be 0 or 400 and nothing in between
 			  // (if set to 100, it goes to 400), so if it's on 400 it will never go to 0
 			  // when it is told to set to 300, it stays at 400.
-			  if ((costTotal < mincost) && (inverter_power_OUT == 400)) {
 //			  if (((costTotal < mincost) && (inverter_power == 400)) || ((costTotal < mincost) && ((inverter_power * 0.4) > consumedPower))) {
+			  if ((costTotal < mincost) && (inverter_power_OUT == 400)) {
 				  inverter_power_OUT = 0;
-				  control = 4;
+				  control = 6;
 			  }
 			  else if (inverter_power_OUT > 100) {
 				  // decrease inverter power
 				  // triple delta when decreasing
-//				  deltapower *= 1;
 		          inverter_power_OUT -= deltapower;
+		          control = 7;
 		          if (newfirmware) inverter_power_OUT += newfirmwarefudge;
-				  control = 5;
+		          if ((inverter_power_OUT < 400) && (costTotal > -0.05)) {
+		        	  inverter_power_OUT = 400;
+		        	  control = 8;
+		          }
 		      }
 		  }
 		  
 		  // double check we aren't buying
 	      if (inverter_power_OUT < 0) {
 	        inverter_power_OUT = 0;
-	        control = 6;
+	        control = 9;
 	      }
 	
 	      // control the maximum power
 	      if (inverter_power_OUT > 6500) {
 	    	  inverter_power_OUT = 6500;
+	    	  control = 10;
 	      }
 	      		      
 		  this.ess.setActivePowerEquals(inverter_power_OUT);
-				this.ess.setReactivePowerEquals(0);
+		  this.ess.setReactivePowerEquals(0);
 		}
 		// ************************************************************************************
 		

@@ -73,6 +73,8 @@ public interface SymmetricEss extends OpenemsComponent {
 				.persistencePriority(PersistencePriority.HIGH) //
 				.text("Negative values for Charge; positive for Discharge") //
 		),
+		
+		// timl
 		ACTIVE_POWER_L1(Doc.of(OpenemsType.INTEGER) //
 				.unit(Unit.WATT) //
 				.persistencePriority(PersistencePriority.HIGH) //
@@ -88,6 +90,7 @@ public interface SymmetricEss extends OpenemsComponent {
 				.persistencePriority(PersistencePriority.HIGH) //
 				.text("Negative values for Charge; positive for Discharge") //
 		),
+		
 		/**
 		 * Reactive Power.
 		 *
@@ -340,6 +343,14 @@ public interface SymmetricEss extends OpenemsComponent {
 
 	public default IntegerReadChannel getActivePowerL1Channel() {
 		return this.channel(ChannelId.ACTIVE_POWER_L1);
+	}
+
+	public default IntegerReadChannel getActivePowerL2Channel() {
+		return this.channel(ChannelId.ACTIVE_POWER_L2);
+	}
+
+	public default IntegerReadChannel getActivePowerL3Channel() {
+		return this.channel(ChannelId.ACTIVE_POWER_L3);
 	}
 
 	/**

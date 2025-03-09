@@ -22,22 +22,23 @@ public class Context extends AbstractContext<BatteryInverterSinexcelImpl> {
 		super(parent);
 		this.config = config;
 		this.targetGridMode = targetGridMode;
-		this.setActivePower = setActivePower;
-		this.setReactivePower = setReactivePower;
+//		this.setActivePower = setActivePower;
+//		this.setReactivePower = setReactivePower;
+		this.setActivePower = 0;
+		this.setReactivePower = 0;
 		this.setEnergyDispatchingMode = 4; // 0 = 3phase mode, 4 = individual phase mode
 		this.setZero = 0;
-		this.setActivePowerL1 = setActivePower/3;
-		this.setActivePowerL2 = setActivePower/3;
-		this.setActivePowerL3 = setActivePower/3;
-//		if (setActivePower > 0) {
-//			// if buying/charging must set L1 to a positive number
-//			this.setActivePowerL1 = 500;
-//		}
-//		else {
-//			this.setActivePowerL1 = 0;
-//		}
-//		this.setActivePowerL2 = setActivePower;
-//		this.setActivePowerL3 = 0;
+
+		if (setActivePower > 0) { // >0 is DISCHARGING
+			this.setActivePowerL1 = 0;
+			this.setActivePowerL2 = setActivePower;
+			this.setActivePowerL3 = 0;
+		}
+		else { // <0 is CHARGING
+			this.setActivePowerL1 = setActivePower/3;
+			this.setActivePowerL2 = setActivePower/3;
+			this.setActivePowerL3 = setActivePower/3;
+		}
 	}
 
 }
