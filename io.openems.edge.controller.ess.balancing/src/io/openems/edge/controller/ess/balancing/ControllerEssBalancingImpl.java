@@ -43,7 +43,9 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 	private int[] meterW = new int[3];
 	private int inverter_power_IN; 
 	private int inverter_power_OUT; 
-	private int control;
+	private int control1;
+	private int control2;
+	private int control3;
 	private int deltapower;
 	private int newfirmwarefudge = -300;
 	private boolean newfirmware = true;
@@ -103,6 +105,10 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 		
 		inverter_power_IN = this.ess.getActivePower().getOrError();
 		inverter_power_OUT = inverter_power_IN;
+//		int x = this.ess.getActivePowerL1Channel();
+		
+		// adjust for the leakage on the phase 1 and 3
+		inverter_power_OUT += (meterW[0] + meterW[2]);
 		
 		// ************************************************************************************
 		if (this.config.targetGridSetpoint() == 27 ||
@@ -161,40 +167,42 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 			}
 		
 		  // only act if cost is outside a set value $/kWh
-		  double costdesired = -0.010;
+		  double costtarget = -0.010;
 		  double costrange = 0.005;
-		  double maxcost = costdesired + costrange;
-		  double mincost = costdesired - costrange;
+		  double maxcost = costtarget + costrange;
+		  double mincost = costtarget - costrange;
 		  
-		  control = 0;
+		  control1 = 0;
+		  control2 = 0;
+		  control3 = 0;
 		  deltapower = 300;
-		  if ((costTotal - costdesired) > 0.20) {
+		  if ((costTotal - costtarget) > 0.20) {
 			  // make a larger change
 			  deltapower = 500;
-			  control = 1;
+			  control1 = 1;
 		  }
-		  else if ((costTotal - costdesired) < -0.10) {
+		  if ((costTotal - costtarget) < -0.10) {
 			  // make a larger change
 			  deltapower = 300;
-			  control = 2;
+			  control1 = 2;
 		  }
-		  else if ((costTotal - costdesired) < -0.20) {
+		  if ((costTotal - costtarget) < -0.20) {
 			  // make a larger change
 			  deltapower = 1000;
-			  control = 3;
+			  control1 = 3;
 		  }
 		  
 		
 		  if (consumedPower < 0) {
 			  // if we are not consuming power, we don't need the battery
-			  // (power is coming from solar)
+			  // power is coming from solar or a large load just shut off
 			  inverter_power_OUT = 0;	
-			  control = 4;
+			  control2 = 1;
 		  }
 		  else if (costTotal > maxcost) {
 		      // increase inverter power
 		      inverter_power_OUT += deltapower;
-			  control = 5;
+			  control2 = 2;
 		
 		  }
 		  else if (costTotal < mincost) {
@@ -205,33 +213,35 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 //			  if (((costTotal < mincost) && (inverter_power == 400)) || ((costTotal < mincost) && ((inverter_power * 0.4) > consumedPower))) {
 			  if ((costTotal < mincost) && (inverter_power_OUT == 400)) {
 				  inverter_power_OUT = 0;
-				  control = 6;
+				  control2 = 3;
 			  }
 			  else if (inverter_power_OUT > 100) {
 				  // decrease inverter power
 				  // triple delta when decreasing
 		          inverter_power_OUT -= deltapower;
-		          control = 7;
+		          control2 = 4;
 		          if (newfirmware) inverter_power_OUT += newfirmwarefudge;
 		          if ((inverter_power_OUT < 400) && (costTotal > -0.05)) {
 		        	  inverter_power_OUT = 400;
-		        	  control = 8;
+		        	  control2 = 5;
 		          }
 		      }
 		  }
-		  
+	
 		  // double check we aren't buying
 	      if (inverter_power_OUT < 0) {
 	        inverter_power_OUT = 0;
-	        control = 9;
+	        control3 = 1;
 	      }
 	
 	      // control the maximum power
 	      if (inverter_power_OUT > 6500) {
 	    	  inverter_power_OUT = 6500;
-	    	  control = 10;
+	    	  control3 = 2;
 	      }
 	      		      
+	      
+	      
 		  this.ess.setActivePowerEquals(inverter_power_OUT);
 		  this.ess.setReactivePowerEquals(0);
 		}
@@ -274,7 +284,8 @@ public class ControllerEssBalancingImpl extends AbstractOpenemsComponent impleme
 	public String debugLog() {
 		if (this.isEnabled()) {
 //			return String.format("Cost:%.3f $", costTotal);
-			return String.format("Cost:$%.3f L1 %d  L2 %d  L3 %d  in %d  out %d  x %d  d %d", costTotal, meterW[0], meterW[1], meterW[2], inverter_power_IN, inverter_power_OUT, control, deltapower );
+			int controlall = control1 * 100 + control2 * 10 + control3;
+			return String.format("Cost:$%.3f L1 %d  L2 %d  L3 %d  in %d  out %d  x%03d  d%d", costTotal, meterW[0], meterW[1], meterW[2], inverter_power_IN, inverter_power_OUT, controlall, deltapower );
 		}
 		else {
 			return null;

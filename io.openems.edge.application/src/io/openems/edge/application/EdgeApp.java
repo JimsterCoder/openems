@@ -18,7 +18,7 @@ public class EdgeApp {
 
 	@Activate
 	private void activate() {
-		var message = "OpenEMS version timl0010 [" + OpenemsConstants.VERSION + "] started";
+		var message = "OpenEMS version timl0015 [" + OpenemsConstants.VERSION + "] started";
 		var line = Strings.repeat("=", message.length());
 		this.log.info(line);
 		this.log.info(message);
